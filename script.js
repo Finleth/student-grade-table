@@ -57,10 +57,6 @@ function handleAddClicked(event){
     clearAddStudentFormInputs();
 }
 
-function handleDeleteClicked(){
-    deleteStudent();
-}
-
 /***************************************************************************************************
  * handleCancelClicked - Event Handler when user clicks the cancel button, should clear out student form
  * @param: {undefined} none
@@ -134,6 +130,13 @@ function updateStudentList(students){
       renderStudentOnDom(students[i]);
     }
 
+    if (!students[0]){
+        $('#noInfo').show();
+    } else {
+        $('#noInfo').hide();
+    }
+
+
     calculateGradeAverage(students);
     renderGradeAverage(gradeAvg);
 }
@@ -150,6 +153,9 @@ function calculateGradeAverage(students){
         currentGradeAvg += parseInt(students[i].grade);
     }
     gradeAvg = Math.floor(currentGradeAvg/(i));
+    if (isNaN(gradeAvg)){
+        gradeAvg = 0;
+    }
 }
 
 /***************************************************************************************************
