@@ -57,6 +57,10 @@ function handleAddClicked(event){
     clearAddStudentFormInputs();
 }
 
+function handleDeleteClicked(){
+    deleteStudent();
+}
+
 /***************************************************************************************************
  * handleCancelClicked - Event Handler when user clicks the cancel button, should clear out student form
  * @param: {undefined} none
@@ -82,6 +86,7 @@ function addStudent(){
 
     updateStudentList(student_array);
 }
+
 /***************************************************************************************************
  * clearAddStudentForm - clears out the form values based on inputIds variable
  */
@@ -100,7 +105,17 @@ function renderStudentOnDom(studentObj){
     var name = $('<td>').text(studentObj.name);
     var course = $('<td>').text(studentObj.course);
     var grade = $('<td>').text(studentObj.grade);
-    var deleete = $('<td>').addClass('btn btn-danger btn-xs').text('Delete');
+    var deleete = $('<td>',{
+        text: 'Delete',
+        'class': 'btn btn-danger btn-xs'
+    }).on('click', deleteStudent);
+
+    function deleteStudent(){
+        var objIndex = student_array.indexOf(studentObj);
+        student_array.splice(objIndex, 1);
+
+        updateStudentList(student_array);
+    }
 
     row.append([name, course, grade, deleete]);
     $('.student-list tbody').append(row);
@@ -146,7 +161,6 @@ function calculateGradeAverage(students){
 function renderGradeAverage(average){
     $('.avgGrade').text(average);
 }
-
 
 
 
