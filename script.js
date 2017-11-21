@@ -106,11 +106,20 @@ function renderStudentOnDom(studentObj){
         'class': 'btn btn-danger btn-xs'
     }).on('click', deleteStudent);
 
-    function deleteStudent(){
+    function deleteStudent(event){
         var objIndex = student_array.indexOf(studentObj);
         student_array.splice(objIndex, 1);
 
-        updateStudentList(student_array);
+        $(event.target.parentNode).remove();
+
+        if (!student_array[0]){
+            $('#noInfo').show();
+        } else {
+            $('#noInfo').hide();
+        }
+
+        calculateGradeAverage(student_array);
+        renderGradeAverage(gradeAvg);
     }
 
     row.append([name, course, grade, deleete]);
