@@ -28,7 +28,6 @@ function addClickHandlersToElements(){
 
 function handleAddClicked(){
     addStudent();
-    clearAddStudentFormInputs();
 }
 
 
@@ -57,7 +56,6 @@ function addStudent(){
         grade: parseInt($('#studentGrade').val()),
         course: $('#course').val(),
     };
-    student_array.push(student);
 
     $.ajax({
         dataType: 'json',
@@ -69,12 +67,17 @@ function addStudent(){
         },
         method: 'post',
         url: 'http://s-apis.learningfuze.com/sgt/create',
-        success: function(newId){
-            student.id = newId.new_id;
+        success: function(data){
+            if (data.success) {
+                clearAddStudentFormInputs();
+                student.id = data.new_id;
+                student_array.push(student);
+                updateStudentList(student_array);
+            } else {
+                displayError(data.errors[0])
+            }
         }
     });
-
-    updateStudentList(student_array);
 }
 
 
@@ -108,9 +111,9 @@ function renderStudentOnDom(studentObj){
             url: 'http://s-apis.learningfuze.com/sgt/delete',
             success: function(data){
                 if (data.success) {
-                    deleteStudentForUser(data.success, objIndex, event.target);
+                    deleteStudentForUser(objIndex, event.target);
                 } else {
-                    console.log(data.errors[0]);
+                    displayError(data.errors[0])
                 }
             }
         });
@@ -121,7 +124,7 @@ function renderStudentOnDom(studentObj){
 }
 
 
-function deleteStudentForUser(deleteHappened, objIndex, domElement){
+function deleteStudentForUser(objIndex, domElement){
     student_array.splice(objIndex, 1);
     $(domElement.parentNode).remove();
 
@@ -174,6 +177,11 @@ function renderGradeAverage(average){
     $('.avgGrade').text(average);
 }
 
+function displayError(errorMessage){
+    $('#errorModal').modal('show');
+    $('#errorModal .errorModalTitle').text("Something Went Wrong");
+    $('#errorModal .errorModalMessage').text(errorMessage);
+}
 
 
 
