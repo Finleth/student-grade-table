@@ -8,10 +8,7 @@
 
 $(document).ready( initializeApp );
 
-var student_array = [
-    { name: 'Jake', course: 'Math', grade: 85 },
-    { name: 'Jill', course: 'Comp Sci', grade: 85 },
-];
+var student_array = [];
 var gradeAvg = 0;
 
 /***********************
@@ -44,6 +41,7 @@ function initializeApp(){
 function addClickHandlersToElements(){
     $('#add').on('click', handleAddClicked);
     $('#cancel').on('click', handleCancelClick);
+    $('#getData').on('click', handleGetDataClick);
 }
 
 /***************************************************************************************************
@@ -52,6 +50,7 @@ function addClickHandlersToElements(){
  * @return: 
        none
  */
+
 function handleAddClicked(event){
     addStudent();
     clearAddStudentFormInputs();
@@ -63,9 +62,23 @@ function handleAddClicked(event){
  * @returns: {undefined} none
  * @calls: clearAddStudentFormInputs
  */
+
 function handleCancelClick(){
     clearAddStudentFormInputs();
 }
+
+function handleGetDataClick(){
+    $.ajax( {
+        dataType: 'json',
+        data: {
+            api_key: 'XXiW0o1avu'
+        },
+        method: 'post',
+        url: 'http://s-apis.learningfuze.com/sgt/get',
+        success: addServerDataToStudentArray
+    } );
+}
+
 /***************************************************************************************************
  * addStudent - creates a student objects based on input fields in the form and adds the object to global student array
  * @param {undefined} none
@@ -148,6 +161,13 @@ function updateStudentList(students){
 
     calculateGradeAverage(students);
     renderGradeAverage(gradeAvg);
+}
+
+function addServerDataToStudentArray(studentData){
+    studentData.data.forEach( function(student){
+        student_array.push(student);
+    });
+    updateStudentList(student_array);
 }
 
 /***************************************************************************************************
