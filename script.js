@@ -15,7 +15,7 @@ var gradeAvg = 0;
 function initializeApp(){
     addClickHandlersToElements();
     updateStudentList(student_array);
-    handleGetDataClick();
+    requestServerData();
 }
 
 
@@ -26,8 +26,12 @@ function addClickHandlersToElements(){
 }
 
 
-function handleAddClicked(){
+function handleAddClicked(event){
+    addLoadingForButton(event.target);
     addStudent();
+    setTimeout(function(){
+        removeLoadingForButton(event.target, handleAddClicked);
+    }, 200);
 }
 
 
@@ -36,7 +40,15 @@ function handleCancelClick(){
 }
 
 
-function handleGetDataClick(){
+function handleGetDataClick(event){
+    addLoadingForButton(event.target);
+    requestServerData();
+    setTimeout(function(){
+        removeLoadingForButton(event.target, handleGetDataClick);
+    }, 200);
+}
+
+function requestServerData(){
     $.ajax( {
         dataType: 'json',
         data: {
@@ -57,6 +69,10 @@ function addStudent(){
         course: $('#course').val(),
     };
 
+    addStudentToServer(student);
+}
+
+function addStudentToServer(student){
     $.ajax({
         dataType: 'json',
         data: {
@@ -74,7 +90,7 @@ function addStudent(){
                 student_array.push(student);
                 updateStudentList(student_array);
             } else {
-                displayError(data.errors[0])
+                displayError("Invalid Input", data.errors[0])
             }
         }
     });
@@ -94,33 +110,45 @@ function renderStudentOnDom(studentObj){
     var course = $('<td>').text(studentObj.course);
     var grade = $('<td>').text(studentObj.grade);
     var deleete = $('<td>',{
-        text: 'Delete',
         'class': 'btn btn-danger btn-xs'
     }).on('click', deleteStudent);
+    var deleteSpinner = $('<span>',{
+        'class': 'loadingSpinner'
+    });
 
     function deleteStudent(event){
+        addLoadingForButton(event.target);
         var objIndex = student_array.indexOf(studentObj);
 
-        $.ajax({
-            method: 'post',
-            data: {
-                api_key: 'XXiW0o1avu',
-                student_id: student_array[objIndex].id
-            },
-            dataType: 'json',
-            url: 'http://s-apis.learningfuze.com/sgt/delete',
-            success: function(data){
-                if (data.success) {
-                    deleteStudentForUser(objIndex, event.target);
-                } else {
-                    displayError(data.errors[0])
-                }
-            }
-        });
+        deleteStudentFromServer(event, objIndex);
+
+        setTimeout(function(){
+            removeLoadingForButton(event.target, deleteStudent);
+        }, 200);
     }
 
+    deleete.append(deleteSpinner, ' Delete');
     row.append([name, course, grade, deleete]);
     $('.student-list tbody').append(row);
+}
+
+function deleteStudentFromServer(event, objIndex){
+    $.ajax({
+        method: 'post',
+        data: {
+            api_key: 'XXiW0o1avu',
+            student_id: student_array[objIndex].id
+        },
+        dataType: 'json',
+        url: 'http://s-apis.learningfuze.com/sgt/delete',
+        success: function(data){
+            if (data.success) {
+                deleteStudentForUser(objIndex, event.target);
+            } else {
+                displayError("Unauthorized To Delete", data.errors[0])
+            }
+        }
+    });
 }
 
 
@@ -177,10 +205,22 @@ function renderGradeAverage(average){
     $('.avgGrade').text(average);
 }
 
-function displayError(errorMessage){
+function displayError(errorTitle, errorMessage){
     $('#errorModal').modal('show');
-    $('#errorModal .errorModalTitle').text("Something Went Wrong");
+    $('#errorModal .errorModalTitle').text(errorTitle);
     $('#errorModal .errorModalMessage').text(errorMessage);
+}
+
+
+function addLoadingForButton(button){
+    $(button).off('click');
+    $(button).find('.loadingSpinner').addClass('glyphicon glyphicon-refresh animateSpin');
+}
+
+
+function removeLoadingForButton(button, callbackFunction){
+    $(button).find('.loadingSpinner').removeClass('glyphicon glyphicon-refresh animateSpin');
+    $(button).on('click', callbackFunction);
 }
 
 

@@ -5,6 +5,7 @@
     <meta name="author" content="Jeffrey Pau">
     <title>Student Grade Table</title>
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="script.js"></script>
@@ -44,9 +45,9 @@
             <input type="text" class="form-control" name="studentGrade" id="studentGrade"
                    placeholder="Student Grade">
         </div>
-        <button type="button" class="btn btn-success" id="add">Add</button>
+        <button type="button" class="btn btn-success" id="add"><span class="loadingSpinner"></span>Add</button>
         <button type="button" class="btn btn-default" id="cancel">Cancel</button>
-        <button type="button" class="btn btn-primary" id="getData">Get Server Data</button>
+        <button type="button" class="btn btn-primary" id="getData"><span class="loadingSpinner"></span>Get Server Data</button>
     </div>
     <div class="student-list-container col-md-9 col-xs-12">
         <table class="student-list table">
