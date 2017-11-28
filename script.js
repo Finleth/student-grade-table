@@ -15,7 +15,6 @@ var gradeAvg = 0;
 function initializeApp(){
     addClickHandlersToElements();
     updateStudentList(student_array);
-    requestServerData();
 }
 
 
@@ -28,10 +27,7 @@ function addClickHandlersToElements(){
 
 function handleAddClicked(event){
     addLoadingForButton(event.target);
-    addStudent();
-    setTimeout(function(){
-        removeLoadingForButton(event.target, handleAddClicked);
-    }, 200);
+    addStudent(event.target);
 }
 
 
@@ -42,26 +38,36 @@ function handleCancelClick(){
 
 function handleGetDataClick(event){
     addLoadingForButton(event.target);
-    requestServerData();
-    setTimeout(function(){
-        removeLoadingForButton(event.target, handleGetDataClick);
-    }, 200);
+    requestServerData(event.target, handleGetDataClick);
 }
 
-function requestServerData(){
+function requestServerData(targetButton){
     $.ajax( {
         dataType: 'json',
         data: {
-            api_key: 'XXiW0o1avu'
+            api_key: 'XXiW0o1avu',
+            // 'force-failure': 'timeout'
         },
         method: 'post',
         url: 'http://s-apis.learningfuze.com/sgt/get',
-        success: addServerDataToStudentArray
+        success: function(data){
+            if (data.success) {
+                addServerDataToStudentArray(data);
+            } else {
+                displayError("Error", 'There was a ' + data.error[0] + ' on the server')
+            }
+        },
+        error: handleAjaxError,
+        complete: function(){
+            setTimeout(function(){
+                removeLoadingForButton(targetButton, handleGetDataClick);
+            }, 200);
+        }
     } );
 }
 
 
-function addStudent(){
+function addStudent(targetButton){
     var student = {
         id: null,
         name: $('#studentName').val(),
@@ -69,10 +75,10 @@ function addStudent(){
         course: $('#course').val(),
     };
 
-    addStudentToServer(student);
+    addStudentToServer(student, targetButton);
 }
 
-function addStudentToServer(student){
+function addStudentToServer(student, targetButton){
     $.ajax({
         dataType: 'json',
         data: {
@@ -92,6 +98,12 @@ function addStudentToServer(student){
             } else {
                 displayError("Invalid Input", data.errors[0])
             }
+        },
+        error: handleAjaxError,
+        complete: function() {
+            setTimeout(function(){
+                removeLoadingForButton(targetButton, handleAddClicked);
+            }, 100);
         }
     });
 }
@@ -120,11 +132,7 @@ function renderStudentOnDom(studentObj){
         addLoadingForButton(event.target);
         var objIndex = student_array.indexOf(studentObj);
 
-        deleteStudentFromServer(event, objIndex);
-
-        setTimeout(function(){
-            removeLoadingForButton(event.target, deleteStudent);
-        }, 200);
+        deleteStudentFromServer(event, objIndex, deleteStudent);
     }
 
     deleete.append(deleteSpinner, ' Delete');
@@ -132,12 +140,12 @@ function renderStudentOnDom(studentObj){
     $('.student-list tbody').append(row);
 }
 
-function deleteStudentFromServer(event, objIndex){
+function deleteStudentFromServer(event, objIndex, deleteStudent){
     $.ajax({
         method: 'post',
         data: {
             api_key: 'XXiW0o1avu',
-            student_id: student_array[objIndex].id
+            student_id: student_array[objIndex].id,
         },
         dataType: 'json',
         url: 'http://s-apis.learningfuze.com/sgt/delete',
@@ -147,6 +155,12 @@ function deleteStudentFromServer(event, objIndex){
             } else {
                 displayError("Unauthorized To Delete", data.errors[0])
             }
+        },
+        error: handleAjaxError,
+        complete: function(){
+            setTimeout(function(){
+                removeLoadingForButton(event.target, deleteStudent);
+            }, 100)
         }
     });
 }
@@ -211,6 +225,9 @@ function displayError(errorTitle, errorMessage){
     $('#errorModal .errorModalMessage').text(errorMessage);
 }
 
+function handleAjaxError(data){
+    displayError(data.status+" Error", data.statusText);
+}
 
 function addLoadingForButton(button){
     $(button).off('click');
