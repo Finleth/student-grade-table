@@ -44,12 +44,12 @@ function handleGetDataClick(event){
 function requestServerData(targetButton){
     $.ajax( {
         dataType: 'json',
-        data: {
-            api_key: 'XXiW0o1avu',
-            // 'force-failure': 'timeout'
-        },
+        // data: {
+        //     api_key: 'XXiW0o1avu',
+        //     // 'force-failure': 'timeout'
+        // },
         method: 'post',
-        url: 'http://s-apis.learningfuze.com/sgt/get',
+        url: './server/sgt.php',
         success: function(data){
             if (data.success) {
                 addServerDataToStudentArray(data);
