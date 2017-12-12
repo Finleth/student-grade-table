@@ -77,6 +77,7 @@ function requestServerData(targetButton){
         method: 'get',
         url: backends[currentBackend].read,
         success: function(data){
+            debugger;
             if (data.success) {
                 addServerDataToStudentArray(data);
             } else {

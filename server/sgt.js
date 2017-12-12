@@ -19,6 +19,8 @@ server.use(function(req, res, next) {
 server.get('/student', function(req, res){
     const db = mysql.createConnection(credentials);
 
+    console.log(req.body);
+
     db.query("SELECT * FROM students", function(error, results, fields){
         const output = {
             success: true,
@@ -28,7 +30,7 @@ server.get('/student', function(req, res){
 
         if (!error) {
             output.success = true;
-            output.data.push(results);
+            output.data = results;
         } else {
             output.error = error;
         }
