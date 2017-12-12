@@ -118,6 +118,7 @@ function addStudentToServer(student, targetButton){
         success: function(data){
             if (data.success) {
                 clearAddStudentFormInputs();
+                debugger;
                 student.id = data.new_id;
                 student_array.push(student);
                 updateStudentList(student_array);
@@ -167,6 +168,7 @@ function renderStudentOnDom(studentObj){
 }
 
 function deleteStudentFromServer(event, objIndex, deleteStudent){
+    console.log(objIndex);
     $.ajax({
         method: backends[currentBackend]['delete'].method,
         data: {

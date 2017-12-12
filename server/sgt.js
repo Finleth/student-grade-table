@@ -28,7 +28,7 @@ server.get('/student', function(req, res){
 
         if (!error) {
             output.success = true;
-            output.data = results;
+            output.data.push(results);
         } else {
             output.error = error;
         }
@@ -41,18 +41,21 @@ server.get('/student', function(req, res){
 server.post('/studentcreate', function(req, res){
     const db = mysql.createConnection(credentials);
 
+    console.log(req.body);
+
     const {name, course, grade} = req.body;
 
     db.query(`INSERT INTO students SET name = '${name}', course = '${course}', grade = '${grade}'`, (error, results, fields) => {
         const output = {
             success: true,
             data: [],
-            errors: []
+            errors: [],
+            new_id: ''
         };
 
         if (!error) {
             output.success = true;
-            output.data = results;
+            output.new_id = results.insertId
         } else {
             output.error = error;
         }
@@ -64,13 +67,26 @@ server.post('/studentcreate', function(req, res){
 
 server.post('/studentdelete', function(req, res){
     const db = mysql.createConnection(credentials);
+
     console.log(req.body);
 
-    db.query(`DELETE FROM students WHERE id=${req.body.student_id}`, function(){
+    db.query(`DELETE FROM students WHERE id=${req.body.student_id}`, function(error, results, field){
+        let output = {
+            success: false,
+            data: [],
+            errors: []
+        };
 
+        if (!error) {
+            output.success = true;
+            output.data.push(results);
+        } else {
+            output.error = error;
+        }
+
+        const json_output = JSON.stringify(output);
+        res.send(json_output)
     });
-
-    res.send('hi');
 });
 
 server.listen(3000, function(){
