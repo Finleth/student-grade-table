@@ -11,6 +11,33 @@ $(document).ready( initializeApp );
 var student_array = [];
 var gradeAvg = 0;
 
+const backends = {
+    php: {
+        create: {
+            url: './server/create.php',
+            method: 'get'
+        },
+        'delete': {
+            url: './server/delete.php',
+            method: 'get'
+        },
+        read: './server/sgt.php',
+    },
+    javascript: {
+        create: {
+            url: 'http://localhost:3000/studentcreate',
+            method: 'post'
+        },
+        'delete': {
+            url: 'http://localhost:3000/studentdelete',
+            method: 'post'
+        },
+        read: 'http://localhost:3000/student',
+    }
+};
+
+let currentBackend = 'javascript';
+
 
 function initializeApp(){
     addClickHandlersToElements();
@@ -46,10 +73,9 @@ function requestServerData(targetButton){
         dataType: 'json',
         // data: {
         //     api_key: 'XXiW0o1avu',
-        //     // 'force-failure': 'timeout'
         // },
-        method: 'post',
-        url: './server/sgt.php',
+        method: 'get',
+        url: backends[currentBackend].read,
         success: function(data){
             if (data.success) {
                 addServerDataToStudentArray(data);
@@ -82,13 +108,13 @@ function addStudentToServer(student, targetButton){
     $.ajax({
         dataType: 'json',
         data: {
-            api_key: 'XXiW0o1avu',
+            // api_key: 'XXiW0o1avu',
             name: student.name,
             course: student.course,
             grade: student.grade
         },
-        method: 'post',
-        url: 'http://s-apis.learningfuze.com/sgt/create',
+        method:  backends[currentBackend].create.method,
+        url: backends[currentBackend].create.url,
         success: function(data){
             if (data.success) {
                 clearAddStudentFormInputs();
@@ -142,13 +168,13 @@ function renderStudentOnDom(studentObj){
 
 function deleteStudentFromServer(event, objIndex, deleteStudent){
     $.ajax({
-        method: 'post',
+        method: backends[currentBackend]['delete'].method,
         data: {
-            api_key: 'XXiW0o1avu',
+            // api_key: 'XXiW0o1avu',
             student_id: student_array[objIndex].id,
         },
         dataType: 'json',
-        url: 'http://s-apis.learningfuze.com/sgt/delete',
+        url: backends[currentBackend]['delete'].url,
         success: function(data){
             if (data.success) {
                 deleteStudentForUser(objIndex, event.target);
