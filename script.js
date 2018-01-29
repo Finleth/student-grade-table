@@ -5,101 +5,269 @@
 /**
  * Listen for the document to load and initialize the application
  */
-$(document).ready();
 
-/**
- * Define all global variables here.  
- */
-/***********************
- * student_array - global array to hold student objects
- * @type {Array}
- * example of student_array after input: 
- * student_array = [
- *  { name: 'Jake', course: 'Math', grade: 85 },
- *  { name: 'Jill', course: 'Comp Sci', grade: 85 }
- * ];
- */
+$(document).ready( initializeApp );
 
-/***************************************************************************************************
-* initializeApp 
-* @params {undefined} none
-* @returns: {undefined} none
-* initializes the application, including adding click handlers and pulling in any data from the server, in later versions
-*/
+var student_array = [];
+var gradeAvg = 0;
+
+const backends = {
+    php: {
+        create: {
+            url: './server/create.php',
+            method: 'get'
+        },
+        'delete': {
+            url: './server/delete.php',
+            method: 'get'
+        },
+        read: './server/sgt.php',
+    },
+    javascript: {
+        create: {
+            url: 'http://localhost:3000/studentcreate',
+            method: 'post'
+        },
+        'delete': {
+            url: 'http://localhost:3000/studentdelete',
+            method: 'post'
+        },
+        read: 'http://localhost:3000/student',
+    }
+};
+
+let currentBackend = 'javascript';
+
+
 function initializeApp(){
+    addClickHandlersToElements();
+    updateStudentList(student_array);
 }
 
-/***************************************************************************************************
-* addClickHandlerstoElements
-* @params {undefined} 
-* @returns  {undefined}
-*     
-*/
+
 function addClickHandlersToElements(){
+    $('#add').on('click', handleAddClicked);
+    $('#cancel').on('click', handleCancelClick);
+    $('#getData').on('click', handleGetDataClick);
 }
 
-/***************************************************************************************************
- * handleAddClicked - Event Handler when user clicks the add button
- * @param {object} event  The event object from the click
- * @return: 
-       none
- */
-function handleAddClicked(){
+
+function handleAddClicked(event){
+    addLoadingForButton(event.target);
+    addStudent(event.target);
 }
-/***************************************************************************************************
- * handleCancelClicked - Event Handler when user clicks the cancel button, should clear out student form
- * @param: {undefined} none
- * @returns: {undefined} none
- * @calls: clearAddStudentFormInputs
- */
+
+
 function handleCancelClick(){
+    clearAddStudentFormInputs();
 }
-/***************************************************************************************************
- * addStudent - creates a student objects based on input fields in the form and adds the object to global student array
- * @param {undefined} none
- * @return undefined
- * @calls clearAddStudentFormInputs, updateStudentList
- */
-function addStudent(){
+
+
+function handleGetDataClick(event){
+    addLoadingForButton(event.target);
+    requestServerData(event.target, handleGetDataClick);
 }
-/***************************************************************************************************
- * clearAddStudentForm - clears out the form values based on inputIds variable
- */
+
+function requestServerData(targetButton){
+    $.ajax( {
+        dataType: 'json',
+        // data: {
+        //     api_key: 'XXiW0o1avu',
+        // },
+        method: 'get',
+        url: backends[currentBackend].read,
+        success: function(data){
+            debugger;
+            if (data.success) {
+                addServerDataToStudentArray(data);
+            } else {
+                displayError("Error", 'There was a ' + data.error[0] + ' on the server')
+            }
+        },
+        error: handleAjaxError,
+        complete: function(){
+            setTimeout(function(){
+                removeLoadingForButton(targetButton, handleGetDataClick);
+            }, 200);
+        }
+    } );
+}
+
+
+function addStudent(targetButton){
+    var student = {
+        id: null,
+        name: $('#studentName').val(),
+        grade: parseInt($('#studentGrade').val()),
+        course: $('#course').val(),
+    };
+
+    addStudentToServer(student, targetButton);
+}
+
+function addStudentToServer(student, targetButton){
+    $.ajax({
+        dataType: 'json',
+        data: {
+            // api_key: 'XXiW0o1avu',
+            name: student.name,
+            course: student.course,
+            grade: student.grade
+        },
+        method:  backends[currentBackend].create.method,
+        url: backends[currentBackend].create.url,
+        success: function(data){
+            if (data.success) {
+                clearAddStudentFormInputs();
+                debugger;
+                student.id = data.new_id;
+                student_array.push(student);
+                updateStudentList(student_array);
+            } else {
+                displayError("Invalid Input", data.errors[0])
+            }
+        },
+        error: handleAjaxError,
+        complete: function() {
+            setTimeout(function(){
+                removeLoadingForButton(targetButton, handleAddClicked);
+            }, 100);
+        }
+    });
+}
+
+
 function clearAddStudentFormInputs(){
-}
-/***************************************************************************************************
- * renderStudentOnDom - take in a student object, create html elements from the values and then append the elements
- * into the .student_list tbody
- * @param {object} studentObj a single student object with course, name, and grade inside
- */
-function renderStudentOnDom(){
-}
-
-/***************************************************************************************************
- * updateStudentList - centralized function to update the average and call student list update
- * @param students {array} the array of student objects
- * @returns {undefined} none
- * @calls renderStudentOnDom, calculateGradeAverage, renderGradeAverage
- */
-function updateStudentList(){
-  
-}
-/***************************************************************************************************
- * calculateGradeAverage - loop through the global student array and calculate average grade and return that value
- * @param: {array} students  the array of student objects
- * @returns {number}
- */
-function calculateGradeAverage(){
-}
-/***************************************************************************************************
- * renderGradeAverage - updates the on-page grade average
- * @param: {number} average    the grade average
- * @returns {undefined} none
- */
-function renderGradeAverage(){
+    $('#studentName').val('');
+    $('#course').val('');
+    $('#studentGrade').val('');
 }
 
 
+function renderStudentOnDom(studentObj){
+    var row = $('<tr>');
+    var name = $('<td>').text(studentObj.name);
+    var course = $('<td>').text(studentObj.course);
+    var grade = $('<td>').text(studentObj.grade);
+    var deleete = $('<td>',{
+        'class': 'btn btn-danger btn-xs'
+    }).on('click', deleteStudent);
+    var deleteSpinner = $('<span>',{
+        'class': 'loadingSpinner'
+    });
+
+    function deleteStudent(event){
+        addLoadingForButton(event.target);
+        var objIndex = student_array.indexOf(studentObj);
+
+        deleteStudentFromServer(event, objIndex, deleteStudent);
+    }
+
+    deleete.append(deleteSpinner, ' Delete');
+    row.append([name, course, grade, deleete]);
+    $('.student-list tbody').append(row);
+}
+
+function deleteStudentFromServer(event, objIndex, deleteStudent){
+    console.log(objIndex);
+    $.ajax({
+        method: backends[currentBackend]['delete'].method,
+        data: {
+            // api_key: 'XXiW0o1avu',
+            student_id: student_array[objIndex].id,
+        },
+        dataType: 'json',
+        url: backends[currentBackend]['delete'].url,
+        success: function(data){
+            if (data.success) {
+                deleteStudentForUser(objIndex, event.target);
+            } else {
+                displayError("Unauthorized To Delete", data.errors[0])
+            }
+        },
+        error: handleAjaxError,
+        complete: function(){
+            setTimeout(function(){
+                removeLoadingForButton(event.target, deleteStudent);
+            }, 100)
+        }
+    });
+}
+
+
+function deleteStudentForUser(objIndex, domElement){
+    student_array.splice(objIndex, 1);
+    $(domElement.parentNode).remove();
+
+    if (!student_array[0]) {
+        $('#noInfo').show();
+    } else {
+        $('#noInfo').hide();
+    }
+
+    calculateGradeAverage(student_array);
+    renderGradeAverage(gradeAvg);
+}
+
+
+function updateStudentList(students){
+    $('.student-list tbody').empty();
+    for (var i=0; i<students.length; i++){
+      renderStudentOnDom(students[i]);
+    }
+
+    if (!students[0]){
+        $('#noInfo').show();
+    } else {
+        $('#noInfo').hide();
+    }
+
+    calculateGradeAverage(students);
+    renderGradeAverage(gradeAvg);
+}
+
+function addServerDataToStudentArray(studentData){
+    student_array = studentData.data;
+
+    updateStudentList(student_array);
+}
+
+function calculateGradeAverage(students){
+    var currentGradeAvg = 0;
+    for (var i=0; i<students.length; i++){
+        currentGradeAvg += parseInt(students[i].grade);
+    }
+    gradeAvg = Math.floor(currentGradeAvg/(i));
+    if (isNaN(gradeAvg)){
+        gradeAvg = 0;
+    }
+}
+
+
+function renderGradeAverage(average){
+    $('.avgGrade').text(average);
+}
+
+function displayError(errorTitle, errorMessage){
+    $('#errorModal').modal('show');
+    $('#errorModal .errorModalTitle').text(errorTitle);
+    $('#errorModal .errorModalMessage').text(errorMessage);
+}
+
+function handleAjaxError(data){
+    displayError(data.status+" Error", data.statusText);
+}
+
+function addLoadingForButton(button){
+    $(button).off('click');
+    $(button).find('.loadingSpinner').addClass('glyphicon glyphicon-refresh animateSpin');
+}
+
+
+function removeLoadingForButton(button, callbackFunction){
+    $(button).find('.loadingSpinner').removeClass('glyphicon glyphicon-refresh animateSpin');
+    $(button).on('click', callbackFunction);
+}
 
 
 

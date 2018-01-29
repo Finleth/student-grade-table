@@ -1,0 +1,20 @@
+//******************** for php *************************//
+
+
+<?php
+
+$conn = mysqli_connect('host','user', 'password', 'database', 'port')
+
+?>
+
+//******************** or for javascript *************************//
+
+var credentials = {
+    user: 'user',
+    password: 'password',
+    host: 'host',
+    port: port,
+    database: 'database'
+};
+
+module.exports = credentials;
