@@ -1,6 +1,6 @@
 var credentials = {
-    user: 'root',
-    password: 'root',
+    user: 'vetPetUser',
+    password: 'magicalmonkeysmarsmaidsmilkingmoors',
     host: 'localhost',
     port: 3306,
     database: 'c1017db'

@@ -77,7 +77,6 @@ function requestServerData(targetButton){
         method: 'get',
         url: backends[currentBackend].read,
         success: function(data){
-            debugger;
             if (data.success) {
                 addServerDataToStudentArray(data);
             } else {
@@ -119,7 +118,6 @@ function addStudentToServer(student, targetButton){
         success: function(data){
             if (data.success) {
                 clearAddStudentFormInputs();
-                debugger;
                 student.id = data.new_id;
                 student_array.push(student);
                 updateStudentList(student_array);
