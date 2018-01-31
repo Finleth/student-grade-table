@@ -19,7 +19,7 @@ if ($result){
         }
         $output['success'] = true;
     } else {
-        $output['errors'][] = 'no data available, sowwy. Except this is the back end, we aren\'t nice. Deal with it.';
+        $output['errors'][] = 'no data available';
     }
 } else {
     $output['errors'][] = 'error in SQL query or credentials';

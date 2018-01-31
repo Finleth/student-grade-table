@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const credentials = require('./sgtcreds');
 const mysql = require('mysql');
@@ -18,10 +16,11 @@ server.use(function(req, res, next) {
 
 server.get('/student', function(req, res){
     const db = mysql.createConnection(credentials);
+    const sql = "SELECT name, course, grade, id FROM students";
 
-    console.log(req.body);
+    console.log(req);
 
-    db.query("SELECT * FROM students", function(error, results, fields){
+    db.query(sql, function(error, results, fields){
         const output = {
             success: true,
             data: [],
@@ -42,12 +41,10 @@ server.get('/student', function(req, res){
 
 server.post('/studentcreate', function(req, res){
     const db = mysql.createConnection(credentials);
-
-    console.log(req.body);
-
+    const sql = `INSERT INTO students SET name = '${name}', course = '${course}', grade = '${grade}'`;
     const {name, course, grade} = req.body;
 
-    db.query(`INSERT INTO students SET name = '${name}', course = '${course}', grade = '${grade}'`, (error, results, fields) => {
+    db.query(sql, (error, results, fields) => {
         const output = {
             success: true,
             data: [],
@@ -69,10 +66,9 @@ server.post('/studentcreate', function(req, res){
 
 server.post('/studentdelete', function(req, res){
     const db = mysql.createConnection(credentials);
+    const sql = `DELETE FROM students WHERE id=${req.body.student_id}`;
 
-    console.log(req.body);
-
-    db.query(`DELETE FROM students WHERE id=${req.body.student_id}`, function(error, results, field){
+    db.query(sql, function(error, results, field){
         let output = {
             success: false,
             data: [],
@@ -92,7 +88,7 @@ server.post('/studentdelete', function(req, res){
 });
 
 server.listen(3000, function(){
-    console.log('server is running, and bonesaw is ready');
+    console.log('server is running on PORT 3000');
 });
 
 

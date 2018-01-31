@@ -1,10 +1,3 @@
-/* information about jsdocs: 
-* param: http://usejsdoc.org/tags-param.html#examples
-* returns: http://usejsdoc.org/tags-returns.html
-* 
-/**
- * Listen for the document to load and initialize the application
- */
 
 $(document).ready( initializeApp );
 
@@ -23,7 +16,7 @@ const backends = {
         },
         read: './server/sgt.php',
     },
-    javascript: {
+    node: {
         create: {
             url: 'http://localhost:3000/studentcreate',
             method: 'post'
@@ -36,7 +29,7 @@ const backends = {
     }
 };
 
-let currentBackend = 'javascript';
+let currentBackend = 'node';
 
 
 function initializeApp(){
@@ -71,9 +64,6 @@ function handleGetDataClick(event){
 function requestServerData(targetButton){
     $.ajax( {
         dataType: 'json',
-        // data: {
-        //     api_key: 'XXiW0o1avu',
-        // },
         method: 'get',
         url: backends[currentBackend].read,
         success: function(data){
@@ -108,7 +98,6 @@ function addStudentToServer(student, targetButton){
     $.ajax({
         dataType: 'json',
         data: {
-            // api_key: 'XXiW0o1avu',
             name: student.name,
             course: student.course,
             grade: student.grade
@@ -171,7 +160,6 @@ function deleteStudentFromServer(event, objIndex, deleteStudent){
     $.ajax({
         method: backends[currentBackend]['delete'].method,
         data: {
-            // api_key: 'XXiW0o1avu',
             student_id: student_array[objIndex].id,
         },
         dataType: 'json',
