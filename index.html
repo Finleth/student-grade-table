@@ -21,32 +21,31 @@
             <small class="pull-right">Grade Average : <span class="avgGrade label label-default">0</span></small>
         </h3>
     </div>
-    <div class="student-add-form col-md-3 col-xs-12 pull-right">
+    <form id="loginForm" class="student-add-form col-md-3 col-xs-12 pull-right" autocomplete="off">
         <h4>Add Student</h4>
         <div class="input-group form-group">
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-user"></span>
             </span>
-            <input type="text" class="form-control" name="studentName" id="studentName" placeholder="Student Name">
+            <input type="text" class="form-control" name="studentName" id="studentName" placeholder="Student Name" title="Must be between 2 and 20 characters long, containing only letters and spaces." pattern="[a-zA-Z ]{2,20}" required autofocus>
         </div>
         <div class="input-group form-group">
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-list-alt"></span>
             </span>
-            <input type="text" class="form-control" name="course" id="course"
-                   placeholder="Student Course">
+            <input type="text" class="form-control" name="course" id="course" placeholder="Student Course" title="Must be between 2 and 20 characters long, containing only letters and spaces." pattern="[a-zA-Z ]{3,25}" required>
         </div>
         <div class="input-group form-group">
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-education"></span>
             </span>
-            <input type="text" class="form-control" name="studentGrade" id="studentGrade"
-                   placeholder="Student Grade">
+            <input type="number" class="form-control" name="studentGrade" id="studentGrade" placeholder="Student Grade" required min="0" max="100">
         </div>
-        <button type="button" class="btn btn-success" id="add"><span class="loadingSpinner"></span>Add</button>
-        <button type="button" class="btn btn-default" id="cancel">Cancel</button>
+        <input type="submit" class="btn btn-success" id="add" value="Add">
+        <button type="button" class="btn btn-default" id="cancel">Clear</button>
         <button type="button" class="btn btn-primary" id="getData"><span class="loadingSpinner"></span>Get Server Data</button>
-    </div>
+        <button type="button" class="btn btn-info" id="switchServer">Use Node Server</button>
+    </form>
     <div class="student-list-container col-md-9 col-xs-12">
         <table class="student-list table">
             <thead>

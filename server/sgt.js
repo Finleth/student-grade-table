@@ -41,8 +41,8 @@ server.get('/student', function(req, res){
 
 server.post('/studentcreate', function(req, res){
     const db = mysql.createConnection(credentials);
-    const sql = `INSERT INTO students SET name = '${name}', course = '${course}', grade = '${grade}'`;
     const {name, course, grade} = req.body;
+    const sql = `INSERT INTO students SET name = '${name}', course = '${course}', grade = '${grade}'`;
 
     db.query(sql, (error, results, fields) => {
         const output = {

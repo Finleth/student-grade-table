@@ -3,6 +3,7 @@ $(document).ready( initializeApp );
 
 var student_array = [];
 var gradeAvg = 0;
+var currentBackend = 'php';
 
 const backends = {
     php: {
@@ -29,9 +30,6 @@ const backends = {
     }
 };
 
-let currentBackend = 'node';
-
-
 function initializeApp(){
     addClickHandlersToElements();
     updateStudentList(student_array);
@@ -39,17 +37,16 @@ function initializeApp(){
 
 
 function addClickHandlersToElements(){
-    $('#add').on('click', handleAddClicked);
+    $('form#loginForm').submit( handleSubmit );
     $('#cancel').on('click', handleCancelClick);
     $('#getData').on('click', handleGetDataClick);
+    $('#switchServer').on('click', handleServerSwitchClick);
 }
 
-
-function handleAddClicked(event){
-    addLoadingForButton(event.target);
-    addStudent(event.target);
+function handleSubmit(event){
+    addStudent();
+    return false;
 }
-
 
 function handleCancelClick(){
     clearAddStudentFormInputs();
@@ -59,6 +56,16 @@ function handleCancelClick(){
 function handleGetDataClick(event){
     addLoadingForButton(event.target);
     requestServerData(event.target, handleGetDataClick);
+}
+
+function handleServerSwitchClick(event){
+    if (currentBackend === 'node'){
+        event.target.innerText = 'Use Node Server';
+        currentBackend = 'php';
+    } else {
+        event.target.innerText = 'Use PHP Server'
+        currentBackend = 'node';
+    }
 }
 
 function requestServerData(targetButton){
@@ -83,7 +90,7 @@ function requestServerData(targetButton){
 }
 
 
-function addStudent(targetButton){
+function addStudent(){
     var student = {
         id: null,
         name: $('#studentName').val(),
@@ -91,10 +98,10 @@ function addStudent(targetButton){
         course: $('#course').val(),
     };
 
-    addStudentToServer(student, targetButton);
+    addStudentToServer(student);
 }
 
-function addStudentToServer(student, targetButton){
+function addStudentToServer(student){
     $.ajax({
         dataType: 'json',
         data: {
@@ -115,11 +122,6 @@ function addStudentToServer(student, targetButton){
             }
         },
         error: handleAjaxError,
-        complete: function() {
-            setTimeout(function(){
-                removeLoadingForButton(targetButton, handleAddClicked);
-            }, 100);
-        }
     });
 }
 
@@ -136,27 +138,76 @@ function renderStudentOnDom(studentObj){
     var name = $('<td>').text(studentObj.name);
     var course = $('<td>').text(studentObj.course);
     var grade = $('<td>').text(studentObj.grade);
-    var deleete = $('<td>',{
-        'class': 'btn btn-danger btn-xs'
+    var operations = $('<td>');
+    var editBtn = $('<button>',{
+        'text': 'Edit',
+        'class': 'btn btn-success btn-sm'
+    }).on('click', editStudent);
+    var deleteBtn = $('<button>',{
+        'class': 'btn btn-danger btn-sm'
     }).on('click', deleteStudent);
     var deleteSpinner = $('<span>',{
         'class': 'loadingSpinner'
     });
 
+    deleteBtn.append(deleteSpinner, ' Delete');
+    operations.append([editBtn, deleteBtn]);
+    row.append([name, course, grade, operations]);
+    $('.student-list tbody').append(row);
+
+    function editStudent(event){
+        const rowNodeList = row[0].childNodes;
+        const rowFields = [studentObj.name, studentObj.course, studentObj.grade];
+        const form = $('<form>');
+
+        for (var i=0; i<3; i++){
+            var td = $(rowNodeList[i]);
+            var input = $('<input>',{
+                type: 'text',
+                name: 'name',
+                required: 'true',
+                value: td.text(),
+                'class': 'form-control'
+            })  
+
+            form.append(input);
+        }
+        debugger;
+
+        editBtn.text('Confirm').off('click').on('click', confirmEdit);
+        deleteBtn.text('Cancel').off('click').on('click', cancelEdit);
+        form.append([editBtn, deleteBtn]);
+
+        row.empty();
+        row.append(form);
+
+        function confirmEdit(){
+            revertEditAndDelete();
+        }
+
+        function cancelEdit(){
+            revertEditAndDelete();
+        }
+
+        function revertEditAndDelete(){
+            for (var i=0; i<3; i++){
+                var td = $(rowNodeList[i]);
+                td.empty().text(rowFields[i]);
+            }
+            editBtn.text('Edit').off('click').on('click', editStudent);
+            deleteBtn.text('Delete').off('click').on('click', deleteStudent);
+        }
+    }
+
     function deleteStudent(event){
         addLoadingForButton(event.target);
         var objIndex = student_array.indexOf(studentObj);
 
-        deleteStudentFromServer(event, objIndex, deleteStudent);
+        deleteStudentFromServer(event.target, objIndex, deleteStudent);
     }
-
-    deleete.append(deleteSpinner, ' Delete');
-    row.append([name, course, grade, deleete]);
-    $('.student-list tbody').append(row);
 }
 
-function deleteStudentFromServer(event, objIndex, deleteStudent){
-    console.log(objIndex);
+function deleteStudentFromServer(domElmt, objIndex, deleteStudent){
     $.ajax({
         method: backends[currentBackend]['delete'].method,
         data: {
@@ -166,7 +217,7 @@ function deleteStudentFromServer(event, objIndex, deleteStudent){
         url: backends[currentBackend]['delete'].url,
         success: function(data){
             if (data.success) {
-                deleteStudentForUser(objIndex, event.target);
+                deleteStudentForUser(objIndex, domElmt.parentNode.parentNode);
             } else {
                 displayError("Unauthorized To Delete", data.errors[0])
             }
@@ -174,16 +225,16 @@ function deleteStudentFromServer(event, objIndex, deleteStudent){
         error: handleAjaxError,
         complete: function(){
             setTimeout(function(){
-                removeLoadingForButton(event.target, deleteStudent);
+                removeLoadingForButton(domElmt, deleteStudent);
             }, 100)
         }
     });
 }
 
 
-function deleteStudentForUser(objIndex, domElement){
+function deleteStudentForUser(objIndex, row){
     student_array.splice(objIndex, 1);
-    $(domElement.parentNode).remove();
+    $(row).remove();
 
     if (!student_array[0]) {
         $('#noInfo').show();
