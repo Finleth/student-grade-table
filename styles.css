@@ -1,4 +1,8 @@
 
+.btn {
+    margin: 2px;
+}
+
 .animateSpin {
     animation: spin .6s infinite linear;
 }
