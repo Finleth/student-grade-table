@@ -41,6 +41,11 @@ function addClickHandlersToElements(){
     $('#cancel').on('click', handleCancelClick);
     $('#getData').on('click', handleGetDataClick);
     $('#switchServer').on('click', handleServerSwitchClick);
+
+    $('body').on('submit', '#edit-form', e => {
+        e.preventDefault();
+        console.log('Edit Form Submit called')
+    })
 }
 
 function handleSubmit(event){
@@ -139,6 +144,7 @@ function renderStudentOnDom(studentObj){
     var course = $('<td>').text(studentObj.course);
     var grade = $('<td>').text(studentObj.grade);
     var operations = $('<td>');
+    var buttons, rowContents;
     var editBtn = $('<button>',{
         'text': 'Edit',
         'class': 'btn btn-success btn-sm'
@@ -150,52 +156,56 @@ function renderStudentOnDom(studentObj){
         'class': 'loadingSpinner'
     });
 
+    buttons = [editBtn, deleteBtn];
+    rowContents = [name, course, grade, operations];
+
     deleteBtn.append(deleteSpinner, ' Delete');
-    operations.append([editBtn, deleteBtn]);
-    row.append([name, course, grade, operations]);
+    operations.append(buttons);
+    row.append(rowContents);
     $('.student-list tbody').append(row);
 
     function editStudent(event){
-        const rowNodeList = row[0].childNodes;
-        const rowFields = [studentObj.name, studentObj.course, studentObj.grade];
-        const form = $('<form>');
+        revertAnyEditing();
+
+        var rowNodeList = row[0].childNodes;
+        var rowFields = [studentObj.name, studentObj.course, studentObj.grade];
+        var td = $('<td>',{
+            colspan: 4
+        });
+        var form = $('<form>');
+        var confirmBtn = $('<button>',{
+            'text': 'Confirm',
+            'class': 'btn btn-success btn-sm'
+        }).on('click', confirmEdit);
+        var cancelBtn = $('<button>',{
+            'text': 'Cancel',
+            'class': 'btn btn-danger btn-sm'
+        }).on('click', revertEditAndDelete);
+        var newButtons = [confirmBtn, cancelBtn];
 
         for (var i=0; i<3; i++){
-            var td = $(rowNodeList[i]);
             var input = $('<input>',{
                 type: 'text',
                 name: 'name',
                 required: 'true',
-                value: td.text(),
-                'class': 'form-control'
+                value: rowFields[i],
+                'class': 'form-control inline-inputs'
             })  
-
             form.append(input);
         }
-        debugger;
 
-        editBtn.text('Confirm').off('click').on('click', confirmEdit);
-        deleteBtn.text('Cancel').off('click').on('click', cancelEdit);
-        form.append([editBtn, deleteBtn]);
-
-        row.empty();
-        row.append(form);
-
+        form.append(newButtons);
+        td.append(form);
+        row.empty().append(td);
+        
         function confirmEdit(){
             revertEditAndDelete();
         }
 
-        function cancelEdit(){
-            revertEditAndDelete();
-        }
-
         function revertEditAndDelete(){
-            for (var i=0; i<3; i++){
-                var td = $(rowNodeList[i]);
-                td.empty().text(rowFields[i]);
-            }
-            editBtn.text('Edit').off('click').on('click', editStudent);
-            deleteBtn.text('Delete').off('click').on('click', deleteStudent);
+            editBtn.on('click', editStudent);
+            deleteBtn.on('click', deleteStudent);
+            row.empty().append(rowContents);
         }
     }
 
@@ -205,6 +215,10 @@ function renderStudentOnDom(studentObj){
 
         deleteStudentFromServer(event.target, objIndex, deleteStudent);
     }
+}
+
+function revertAnyEditing(){
+    $('table tbody').find('form').find('button.btn-danger').click();
 }
 
 function deleteStudentFromServer(domElmt, objIndex, deleteStudent){
