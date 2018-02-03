@@ -41,11 +41,6 @@ function addClickHandlersToElements(){
     $('#cancel').on('click', handleCancelClick);
     $('#getData').on('click', handleGetDataClick);
     $('#switchServer').on('click', handleServerSwitchClick);
-
-    $('body').on('submit', '#edit-form', e => {
-        e.preventDefault();
-        console.log('Edit Form Submit called')
-    })
 }
 
 function handleSubmit(event){
