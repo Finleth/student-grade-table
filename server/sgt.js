@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const bodyParser = require('body-parser');
 
 const server = express();
+const db = mysql.createConnection(credentials);
 
 server.use(bodyParser.urlencoded({ extended: false }));
 server.use( bodyParser.json() );
@@ -14,15 +15,12 @@ server.use(function(req, res, next) {
     next();
 });
 
-server.get('/student', function(req, res){
-    const db = mysql.createConnection(credentials);
+server.get('/student', (req, res) => {
     const sql = "SELECT name, course, grade, id FROM students";
-
-    console.log(req);
 
     db.query(sql, function(error, results, fields){
         const output = {
-            success: true,
+            success: false,
             data: [],
             errors: []
         };
@@ -39,14 +37,13 @@ server.get('/student', function(req, res){
     });
 });
 
-server.post('/studentcreate', function(req, res){
-    const db = mysql.createConnection(credentials);
+server.post('/studentcreate', (req, res) => {
     const {name, course, grade} = req.body;
     const sql = `INSERT INTO students SET name = '${name}', course = '${course}', grade = '${grade}'`;
 
     db.query(sql, (error, results, fields) => {
         const output = {
-            success: true,
+            success: false,
             data: [],
             errors: [],
             new_id: ''
@@ -64,8 +61,28 @@ server.post('/studentcreate', function(req, res){
     });
 });
 
-server.post('/studentdelete', function(req, res){
-    const db = mysql.createConnection(credentials);
+server.post('/studentupdate', (req, res) => {
+    const {name, course, grade, id} = req.body;
+    const sql = `UPDATE students SET name='${name}', course='${course}', grade=${grade} WHERE id=${id}`;
+
+    db.query(sql, (error, results) => {
+        const output = {
+            success: false,
+            errors: []
+        };
+
+        if (!error) {
+            output.success = true;
+        } else {
+            output.error = error;
+        }
+
+        const json_output = JSON.stringify(output);
+        res.send(json_output)
+    })
+})
+
+server.post('/studentdelete', (req, res) => {
     const sql = `DELETE FROM students WHERE id=${req.body.student_id}`;
 
     db.query(sql, function(error, results, field){

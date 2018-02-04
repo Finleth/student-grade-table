@@ -22,6 +22,10 @@ const backends = {
             url: 'http://localhost:3000/studentcreate',
             method: 'post'
         },
+        update: {
+            url: 'http://localhost:3000/studentupdate',
+            method: 'post'
+        },
         'delete': {
             url: 'http://localhost:3000/studentdelete',
             method: 'post'
@@ -33,6 +37,7 @@ const backends = {
 function initializeApp(){
     addClickHandlersToElements();
     updateStudentList(student_array);
+    requestServerData(null);
 }
 
 
@@ -44,8 +49,8 @@ function addClickHandlersToElements(){
 }
 
 function handleSubmit(event){
+    event.preventDefault();
     addStudent();
-    return false;
 }
 
 function handleCancelClick(){
@@ -55,7 +60,7 @@ function handleCancelClick(){
 
 function handleGetDataClick(event){
     addLoadingForButton(event.target);
-    requestServerData(event.target, handleGetDataClick);
+    requestServerData(event.target);
 }
 
 function handleServerSwitchClick(event){
@@ -163,15 +168,44 @@ function renderStudentOnDom(studentObj){
         revertAnyEditing();
 
         var rowNodeList = row[0].childNodes;
-        var rowFields = [studentObj.name, studentObj.course, studentObj.grade];
+        var editInputs = [
+            {
+                type: 'text',
+                name: 'student',
+                required: 'true',
+                value: rowContents[0].text(),
+                pattern: '[a-zA-Z ]{2,20}',
+                title: 'Must be between 2 and 20 characters long, containing only letters and spaces.',
+                'class': 'form-control inline-inputs'
+            },
+            {
+                type: 'text',
+                name: 'course',
+                required: 'true',
+                value: rowContents[1].text(),
+                pattern: '[a-zA-Z ]{2,20}',
+                title: 'Must be between 2 and 20 characters long, containing only letters and spaces.',
+                'class': 'form-control inline-inputs'
+            },
+            {
+                type: 'number',
+                name: 'grade',
+                required: 'true',
+                value: rowContents[2].text(),
+                min: 0,
+                max: 100,
+                'class': 'form-control inline-inputs'
+            }
+        ]
         var td = $('<td>',{
             colspan: 4
         });
-        var form = $('<form>');
-        var confirmBtn = $('<button>',{
-            'text': 'Confirm',
+        var form = $('<form>').on('submit', confirmEdit);
+        var confirmBtn = $('<input>',{
+            'type': 'submit',
+            'value': 'Confirm',
             'class': 'btn btn-success btn-sm'
-        }).on('click', confirmEdit);
+        });
         var cancelBtn = $('<button>',{
             'text': 'Cancel',
             'class': 'btn btn-danger btn-sm'
@@ -179,13 +213,7 @@ function renderStudentOnDom(studentObj){
         var newButtons = [confirmBtn, cancelBtn];
 
         for (var i=0; i<3; i++){
-            var input = $('<input>',{
-                type: 'text',
-                name: 'name',
-                required: 'true',
-                value: rowFields[i],
-                'class': 'form-control inline-inputs'
-            })  
+            var input = $('<input>',editInputs[i]);
             form.append(input);
         }
 
@@ -193,14 +221,20 @@ function renderStudentOnDom(studentObj){
         td.append(form);
         row.empty().append(td);
         
-        function confirmEdit(){
-            revertEditAndDelete();
+        function confirmEdit(event){
+            event.preventDefault(); 
+            updateStudentOnServer(form[0], studentObj.id, revertEditAndDelete, rowContents);           
         }
 
-        function revertEditAndDelete(){
+        function cancelEdit(event){
+            event.preventDefault();
+            revertEditAndDelete(rowContents);
+        }
+
+        function revertEditAndDelete(contents){
             editBtn.on('click', editStudent);
             deleteBtn.on('click', deleteStudent);
-            row.empty().append(rowContents);
+            row.empty().append(contents);
         }
     }
 
@@ -216,19 +250,45 @@ function revertAnyEditing(){
     $('table tbody').find('form').find('button.btn-danger').click();
 }
 
+function updateStudentOnServer(editForm, studentId, successCallback, rowContents){
+    var ajaxOptions = {
+        method: backends[currentBackend].update.method,
+        data: {
+            name: editForm[0].value,
+            course: editForm[1].value,
+            grade: editForm[2].value,
+            id: studentId
+        },
+        dataType: 'json',
+        url: backends[currentBackend].update.url,
+        success: function(results){
+            if (results.success) {
+                rowContents[0].text(editForm[0].value);
+                rowContents[1].text(editForm[1].value);
+                rowContents[2].text(editForm[2].value);
+                successCallback(rowContents);
+            } else {
+                displayError("Unable to Update", results.errors[0])
+            }
+        },
+        error: handleAjaxError
+    }
+    $.ajax(ajaxOptions);
+}
+
 function deleteStudentFromServer(domElmt, objIndex, deleteStudent){
-    $.ajax({
+    var ajaxOptions = {
         method: backends[currentBackend]['delete'].method,
         data: {
             student_id: student_array[objIndex].id,
         },
         dataType: 'json',
         url: backends[currentBackend]['delete'].url,
-        success: function(data){
-            if (data.success) {
+        success: function(results){
+            if (results.success) {
                 deleteStudentForUser(objIndex, domElmt.parentNode.parentNode);
             } else {
-                displayError("Unauthorized To Delete", data.errors[0])
+                displayError("Unauthorized To Delete", results.errors[0])
             }
         },
         error: handleAjaxError,
@@ -237,7 +297,8 @@ function deleteStudentFromServer(domElmt, objIndex, deleteStudent){
                 removeLoadingForButton(domElmt, deleteStudent);
             }, 100)
         }
-    });
+    }
+    $.ajax(ajaxOptions);
 }
 
 
