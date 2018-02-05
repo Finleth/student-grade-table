@@ -215,10 +215,7 @@ function renderStudentOnDom(studentObj){
         });
         var form = $('<form>').on('submit', confirmEdit);
         var btnDiv = $('<div>',{
-            width: '25%',
-            css: {
-                float: 'right'
-            }
+            'class': 'edit-delete-container'
         })
         var confirmBtn = $('<input>',{
             'type': 'submit',
