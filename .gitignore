@@ -2,3 +2,5 @@
 .idea
 README.md
 node_modules
+server/node/sgtcreds.js
+server/php/sgtcreds.php
