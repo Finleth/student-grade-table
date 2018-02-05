@@ -188,7 +188,7 @@ function renderStudentOnDom(studentObj){
                 required: 'true',
                 value: rowContents[0].text(),
                 pattern: '[a-zA-Z ]{2,20}',
-                title: 'Must be between 2 and 20 characters long, containing only letters and spaces.',
+                title: 'Name must be between 2 and 20 characters long containing only letters and spaces.',
                 'class': 'form-control inline-inputs'
             },
             {
@@ -197,16 +197,16 @@ function renderStudentOnDom(studentObj){
                 required: 'true',
                 value: rowContents[1].text(),
                 pattern: '[a-zA-Z ]{2,25}',
-                title: 'Must be between 2 and 25 characters long, containing only letters and spaces.',
+                title: 'Course must be between 2 and 25 characters long containing only letters and spaces.',
                 'class': 'form-control inline-inputs'
             },
             {
-                type: 'number',
+                type: 'text',
                 name: 'grade',
                 required: 'true',
                 value: rowContents[2].text(),
-                min: 0,
-                max: 100,
+                pattern: '^\\d{1,2}$|100',
+                title: 'Grade must be an integer between 0 and 100.',
                 'class': 'form-control inline-inputs'
             }
         ]
@@ -222,7 +222,7 @@ function renderStudentOnDom(studentObj){
         var cancelBtn = $('<button>',{
             'text': 'Cancel',
             'class': 'btn btn-danger btn-sm'
-        }).on('click', revertEditAndDelete);
+        }).on('click', cancelEdit);
         var newButtons = [confirmBtn, cancelBtn];
 
         for (var i=0; i<3; i++){
