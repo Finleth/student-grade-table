@@ -8,6 +8,14 @@
     margin: 2px;
 }
 
+.operation-btn {
+    width: 70px;
+}
+
+tbody tr:nth-child(2n+1) {
+    background-color: rgb(234, 234, 253);
+}
+
 .animateSpin {
     animation: spin .6s infinite linear;
 }
