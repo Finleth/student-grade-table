@@ -8,19 +8,19 @@ var currentBackend = 'php';
 var backends = {
     php: {
         create: {
-            url: './server/create.php',
+            url: './server/php/create.php',
             method: 'post'
         },
         update: {
-            url: './server/update.php',
+            url: './server/php/update.php',
             method: 'post'
         },
         'delete': {
-            url: './server/delete.php',
+            url: './server/php/delete.php',
             method: 'post'
         },
         read: {
-            url: './server/get.php',
+            url: './server/php/get.php',
             method: 'get'
         }
     },
