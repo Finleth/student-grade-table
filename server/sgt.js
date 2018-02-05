@@ -15,6 +15,8 @@ server.use(function(req, res, next) {
     next();
 });
 
+
+
 server.get('/student', (req, res) => {
     const sql = "SELECT name, course, grade, id FROM students";
 
@@ -29,7 +31,7 @@ server.get('/student', (req, res) => {
             output.success = true;
             output.data = results;
         } else {
-            output.error = error;
+            output.error = 'There was an error on the server. Try again.';
         }
 
         const json_output = JSON.stringify(output);
@@ -39,55 +41,88 @@ server.get('/student', (req, res) => {
 
 server.post('/studentcreate', (req, res) => {
     const {name, course, grade} = req.body;
-    const sql = `INSERT INTO students SET name = '${name}', course = '${course}', grade = '${grade}'`;
 
-    db.query(sql, (error, results, fields) => {
-        const output = {
-            success: false,
-            data: [],
-            errors: [],
-            new_id: ''
-        };
+    const output = {
+        success: false,
+        data: [],
+        errors: []
+    };
 
-        if (!error) {
-            output.success = true;
-            output.new_id = results.insertId
-        } else {
-            output.error.push('The server was not able to add the student to the database');
-        }
+    if ( !name.match(/^[a-zA-Z ]{2,20}$/) ){
+        output.errors.push('Name must be between 2 and 20 characters long and can contain only letters and spaces.');
+    }
+    if ( !course.match(/^[a-zA-Z ]{2,25}$/) ){
+        output.errors.push('Course must be between 2 and 25 characters long and can contain only letters and spaces.');
+    }
+    if ( !grade.match(/^\d{1,2}$|100/) ){
+        output.errors.push('Grade must be an integer between 0 and 100.');
+    }
 
+    if ( !output.errors[0] ){
+        const sql = `INSERT INTO students SET name = ?, course = ?, grade = ?`;
+        const inputs = [name, course, grade];
+
+        db.query(sql, inputs, (error, results, fields) => {
+
+            if (!error) {
+                output.success = true;
+                output.new_id = results.insertId
+            } else {
+                output.error.push('There was an error on the server. Try again.');
+            }
+            const json_output = JSON.stringify(output);
+            res.send(json_output)
+        });
+    } else {
         const json_output = JSON.stringify(output);
         res.send(json_output)
-    });
+    }
 });
 
 server.post('/studentupdate', (req, res) => {
     const {name, course, grade, id} = req.body;
-    const sql = `CALL updateStudent('${name}', '${course}', ${grade},${id})`;
 
-    db.query(sql, (error, results) => {
-        const output = {
-            success: false,
-            data: null,
-            errors: []
-        };
+    const output = {
+        success: false,
+        data: null,
+        errors: []
+    };
 
-        if (!error) {
-            output.success = true;
-            output.data = results[0];
-        } else {
-            output.error.push('The server was not able to update the student on the database');
-        }
+    if ( !name.match(/^[a-zA-Z ]{2,20}$/) ){
+        output.errors.push('Name must be between 2 and 20 characters long and can contain only letters and spaces.');
+    }
+    if ( !course.match(/^[a-zA-Z ]{2,25}$/) ){
+        output.errors.push('Course must be between 2 and 25 characters long and can contain only letters and spaces.');
+    }
+    if ( !grade.match(/^\d{1,2}$|100/) ){
+        output.errors.push('Grade must be an integer between 0 and 100.');
+    }
 
+    if (!output.errors[0] ){
+        const sql = `CALL updateStudent('${name}', '${course}', ${grade}, ${id})`;
+
+        db.query(sql, (error, results) => {
+            if (!error) {
+                output.success = true;
+                output.data = results[0];
+            } else {
+                output.errors.push('There was an error on the server. Try again.');
+            }
+
+            const json_output = JSON.stringify(output);
+            res.send(json_output)
+        })
+    } else {
         const json_output = JSON.stringify(output);
         res.send(json_output)
-    })
+    }
 })
 
 server.post('/studentdelete', (req, res) => {
-    const sql = `DELETE FROM students WHERE id=${req.body.student_id}`;
+    const sql = `DELETE FROM students WHERE id = ?`;
+    const input = req.body.student_id
 
-    db.query(sql, function(error, results, field){
+    db.query(sql, input, function(error, results, field){
         let output = {
             success: false,
             data: [],
@@ -98,7 +133,7 @@ server.post('/studentdelete', (req, res) => {
             output.success = true;
             output.data.push(results);
         } else {
-            output.error = 'The server was not able to delete the student from the database';
+            output.error = 'There was an error on the server. Try again.';
         }
 
         const json_output = JSON.stringify(output);
