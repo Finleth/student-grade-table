@@ -19,10 +19,10 @@ if ($result){
         $output['success'] = true;
         $output['data'][] = 'Student was successfully deleted';
     } else {
-        $output['errors'][] = 'The server was not able to delete the student in the database';
+        $output['errors'][] = 'There was an error on the server. Try again.';
     }
 } else {
-    $output['errors'][] = 'error in SQL query or credentials';
+    $output['errors'][] = 'There was an error on the server. Try again.';
 }
 
 $json_output = json_encode($output);

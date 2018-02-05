@@ -1,11 +1,25 @@
+
+.btn {
+    margin: 2px;
+}
+
 .inline-inputs {
     display: inline-block;
     margin-right: 3%;
     width: 22%;
 }
 
-.btn {
-    margin: 2px;
+.edit-delete-container {
+    width: 25%;
+    float: right;
+}
+
+.operation-btn {
+    width: 70px;
+}
+
+tbody tr:nth-child(2n+1) {
+    background-color: rgb(234, 234, 253);
 }
 
 .animateSpin {

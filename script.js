@@ -157,10 +157,10 @@ function renderStudentOnDom(studentObj){
     var buttons, rowContents;
     var editBtn = $('<button>',{
         'text': 'Edit',
-        'class': 'btn btn-success btn-sm'
+        'class': 'btn btn-success btn-sm operation-btn'
     }).on('click', editStudent);
     var deleteBtn = $('<button>',{
-        'class': 'btn btn-danger btn-sm'
+        'class': 'btn btn-danger btn-sm operation-btn'
     }).on('click', deleteStudent);
     var deleteSpinner = $('<span>',{
         'class': 'loadingSpinner'
@@ -214,23 +214,26 @@ function renderStudentOnDom(studentObj){
             colspan: 4
         });
         var form = $('<form>').on('submit', confirmEdit);
+        var btnDiv = $('<div>',{
+            'class': 'edit-delete-container'
+        })
         var confirmBtn = $('<input>',{
             'type': 'submit',
             'value': 'Confirm',
-            'class': 'btn btn-success btn-sm'
+            'class': 'btn btn-success btn-sm operation-btn'
         });
         var cancelBtn = $('<button>',{
             'text': 'Cancel',
-            'class': 'btn btn-danger btn-sm'
+            'class': 'btn btn-danger btn-sm operation-btn float-right'
         }).on('click', cancelEdit);
-        var newButtons = [confirmBtn, cancelBtn];
+        btnDiv.append([confirmBtn, cancelBtn]);
 
         for (var i=0; i<3; i++){
             var input = $('<input>',editInputs[i]);
             form.append(input);
         }
 
-        form.append(newButtons);
+        form.append(btnDiv);
         td.append(form);
         row.empty().append(td);
         

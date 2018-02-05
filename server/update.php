@@ -44,10 +44,10 @@ if ($result) {
         $output['data'][] = $row;
         $output['success'] = true;
     } else {
-        $output['errors'][] = 'The server was not able to update the student on the database';
+        $output['errors'][] = 'There was an error on the server. Try again.';
     }
 } else {
-    $output['errors'][] = 'error in SQL query or credentials';
+    $output['errors'][] = 'There was an error on the server. Try again.';
 }
 
 

@@ -44,10 +44,10 @@ if ($result) {
         $output['success'] = true;
         $output['new_id'] = $new_id;
     } else {
-        $output['errors'][] = 'The server was not able to insert the student to the database';
+        $output['errors'][] = 'There was an error on the server. Try again.';
     }
 } else {
-    $output['errors'][] = 'error in SQL query or credentials';
+    $output['errors'][] = 'There was an error on the server. Try again.';
 }
 
 

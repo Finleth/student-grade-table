@@ -1,5 +1,6 @@
 //******************** for php *************************//
 
+// name php file:  sgtcreds.php
 
 <?php
 
@@ -7,7 +8,9 @@ $conn = mysqli_connect('host','user', 'password', 'database', 'port')
 
 ?>
 
-//******************** or for javascript *************************//
+//******************** for javascript *************************//
+
+// name javascript file:  sgtcreds.js
 
 var credentials = {
     user: 'user',
