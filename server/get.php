@@ -4,7 +4,7 @@ require_once('sgtcreds.php');
 
 $sql = "SELECT * FROM students";
 
-$result = mysqli_query($conn, $query);
+$result = mysqli_query($conn, $sql);
 
 $output = [
     'success' => false,

@@ -53,7 +53,7 @@ server.post('/studentcreate', (req, res) => {
             output.success = true;
             output.new_id = results.insertId
         } else {
-            output.error = error;
+            output.error.push('The server was not able to add the student to the database');
         }
 
         const json_output = JSON.stringify(output);
@@ -76,7 +76,7 @@ server.post('/studentupdate', (req, res) => {
             output.success = true;
             output.data = results[0];
         } else {
-            output.error = error;
+            output.error.push('The server was not able to update the student on the database');
         }
 
         const json_output = JSON.stringify(output);
@@ -98,7 +98,7 @@ server.post('/studentdelete', (req, res) => {
             output.success = true;
             output.data.push(results);
         } else {
-            output.error = error;
+            output.error = 'The server was not able to delete the student from the database';
         }
 
         const json_output = JSON.stringify(output);

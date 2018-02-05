@@ -12,15 +12,13 @@ $sql = "INSERT INTO students SET
     grade = '{$grade}'
 ";
 
-$result = mysqli_query($conn, $query);
+$result = mysqli_query($conn, $sql);
 
 $output = [
     'success' => false,
     'data' => [],
     'errors' => []
 ];
-
-$output['data'][] = $query;
 
 if ($result) {
     if ( mysqli_affected_rows($conn) > 0 ){
@@ -29,7 +27,6 @@ if ($result) {
         $output['new_id'] = $new_id;
     } else {
         $output['errors'][] = 'The server was not able to insert the student to the database';
-        $output['errors'][] = $result;
     }
 } else {
     $output['errors'][] = 'error in SQL query or credentials';
