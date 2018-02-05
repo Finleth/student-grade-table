@@ -2,7 +2,7 @@
 
 require_once('sgtcreds.php');
 
-$id = $_POST['student_id'];
+$id = filter_var($_POST['student_id'], FILTER_SANITIZE_NUMBER_INT);
 
 $sql = "DELETE FROM students WHERE id=$id";
 
