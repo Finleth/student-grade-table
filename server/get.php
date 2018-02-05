@@ -19,10 +19,10 @@ if ($result){
         }
         $output['success'] = true;
     } else {
-        $output['errors'][] = 'no data available';
+        $output['errors'][] = 'There was an error on the server. Try again.';
     }
 } else {
-    $output['errors'][] = 'error in SQL query or credentials';
+    $output['errors'][] = 'There was an error on the server. Try again.';
 }
 
 $json_output = json_encode($output);
