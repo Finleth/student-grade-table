@@ -2,9 +2,9 @@
 
 require_once('sgtcreds.php');
 
-$id = $_GET['student_id'];
+$id = $_POST['student_id'];
 
-$query = "DELETE FROM students WHERE id=$id";
+$sql = "DELETE FROM students WHERE id=$id";
 
 $result = mysqli_query($conn, $query);
 

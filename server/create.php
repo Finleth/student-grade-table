@@ -2,11 +2,11 @@
 
 require_once('sgtcreds.php');
 
-$name = $_GET['name'];
-$course = $_GET['course'];
-$grade = $_GET['grade'];
+$name = $_POST['name'];
+$course = $_POST['course'];
+$grade = $_POST['grade'];
 
-$query = "INSERT INTO students SET
+$sql = "INSERT INTO students SET
     name = '{$name}',
     course = '{$course}',
     grade = '{$grade}'

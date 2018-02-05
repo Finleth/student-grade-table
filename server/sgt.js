@@ -63,16 +63,18 @@ server.post('/studentcreate', (req, res) => {
 
 server.post('/studentupdate', (req, res) => {
     const {name, course, grade, id} = req.body;
-    const sql = `UPDATE students SET name='${name}', course='${course}', grade=${grade} WHERE id=${id}`;
+    const sql = `CALL updateStudent('${name}', '${course}', ${grade},${id})`;
 
     db.query(sql, (error, results) => {
         const output = {
             success: false,
+            data: null,
             errors: []
         };
 
         if (!error) {
             output.success = true;
+            output.data = results[0];
         } else {
             output.error = error;
         }

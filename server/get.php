@@ -2,7 +2,7 @@
 
 require_once('sgtcreds.php');
 
-$query = "SELECT name, grade, course, id FROM students";
+$sql = "SELECT * FROM students";
 
 $result = mysqli_query($conn, $query);
 
