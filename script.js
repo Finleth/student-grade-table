@@ -5,17 +5,24 @@ var student_array = [];
 var gradeAvg = 0;
 var currentBackend = 'php';
 
-const backends = {
+var backends = {
     php: {
         create: {
             url: './server/create.php',
-            method: 'get'
+            method: 'post'
+        },
+        update: {
+            url: './server/update.php',
+            method: 'post'
         },
         'delete': {
             url: './server/delete.php',
-            method: 'get'
+            method: 'post'
         },
-        read: './server/sgt.php',
+        read: {
+            url: './server/get.php',
+            method: 'get'
+        }
     },
     node: {
         create: {
@@ -30,7 +37,10 @@ const backends = {
             url: 'http://localhost:3000/studentdelete',
             method: 'post'
         },
-        read: 'http://localhost:3000/student',
+        read: {
+            url: 'http://localhost:3000/student',
+            method: 'get'
+        }
     }
 };
 
@@ -76,13 +86,13 @@ function handleServerSwitchClick(event){
 function requestServerData(targetButton){
     $.ajax( {
         dataType: 'json',
-        method: 'get',
-        url: backends[currentBackend].read,
+        method: backends[currentBackend].read.method,
+        url: backends[currentBackend].read.url,
         success: function(data){
             if (data.success) {
                 addServerDataToStudentArray(data);
             } else {
-                displayError("Error", 'There was a ' + data.error[0] + ' on the server')
+                displayError("Error", 'There was a ' + data.error[0] + ' on the server');
             }
         },
         error: handleAjaxError,
@@ -164,6 +174,9 @@ function renderStudentOnDom(studentObj){
     row.append(rowContents);
     $('.student-list tbody').append(row);
 
+    // adding next two function definitions inside this render student on 
+    // dom function for the use of closures
+
     function editStudent(event){
         revertAnyEditing();
 
@@ -183,8 +196,8 @@ function renderStudentOnDom(studentObj){
                 name: 'course',
                 required: 'true',
                 value: rowContents[1].text(),
-                pattern: '[a-zA-Z ]{2,20}',
-                title: 'Must be between 2 and 20 characters long, containing only letters and spaces.',
+                pattern: '[a-zA-Z ]{2,25}',
+                title: 'Must be between 2 and 25 characters long, containing only letters and spaces.',
                 'class': 'form-control inline-inputs'
             },
             {
@@ -223,7 +236,7 @@ function renderStudentOnDom(studentObj){
         
         function confirmEdit(event){
             event.preventDefault(); 
-            updateStudentOnServer(form[0], studentObj.id, revertEditAndDelete, rowContents);           
+            updateStudentOnServer(form[0], student_array.indexOf(studentObj), revertEditAndDelete, rowContents);           
         }
 
         function cancelEdit(event){
@@ -250,23 +263,32 @@ function revertAnyEditing(){
     $('table tbody').find('form').find('button.btn-danger').click();
 }
 
-function updateStudentOnServer(editForm, studentId, successCallback, rowContents){
+function updateStudentOnServer(editForm, student_index, successCallback, rowContents){
     var ajaxOptions = {
         method: backends[currentBackend].update.method,
         data: {
             name: editForm[0].value,
             course: editForm[1].value,
             grade: editForm[2].value,
-            id: studentId
+            id: student_array[student_index].id
         },
         dataType: 'json',
         url: backends[currentBackend].update.url,
         success: function(results){
             if (results.success) {
-                rowContents[0].text(editForm[0].value);
-                rowContents[1].text(editForm[1].value);
-                rowContents[2].text(editForm[2].value);
+                const { name, course, grade } = results.data[0];
+
+                student_array[student_index].name = name;
+                student_array[student_index].course = course;
+                student_array[student_index].grade = grade;
+
+                rowContents[0].text(name);
+                rowContents[1].text(course);
+                rowContents[2].text(grade);
+
                 successCallback(rowContents);
+                calculateGradeAverage(student_array);
+                renderGradeAverage(gradeAvg);
             } else {
                 displayError("Unable to Update", results.errors[0])
             }
@@ -350,7 +372,6 @@ function calculateGradeAverage(students){
     }
 }
 
-
 function renderGradeAverage(average){
     $('.avgGrade').text(average);
 }
@@ -375,6 +396,3 @@ function removeLoadingForButton(button, callbackFunction){
     $(button).find('.loadingSpinner').removeClass('glyphicon glyphicon-refresh animateSpin');
     $(button).on('click', callbackFunction);
 }
-
-
-

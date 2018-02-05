@@ -5,12 +5,9 @@ require_once('sgtcreds.php');
 $name = $_POST['name'];
 $course = $_POST['course'];
 $grade = $_POST['grade'];
+$id = $_POST['id'];
 
-$sql = "INSERT INTO students SET
-    name = '{$name}',
-    course = '{$course}',
-    grade = '{$grade}'
-";
+$sql = "CALL updateStudent('{$name}', '{$course}', {$grade}, {$id})";
 
 $result = mysqli_query($conn, $sql);
 
@@ -22,11 +19,11 @@ $output = [
 
 if ($result) {
     if ( mysqli_affected_rows($conn) > 0 ){
-        $new_id = mysqli_insert_id($conn);
+        $row = mysqli_fetch_assoc($result);
+        $output['data'][] = $row;
         $output['success'] = true;
-        $output['new_id'] = $new_id;
     } else {
-        $output['errors'][] = 'The server was not able to insert the student to the database';
+        $output['errors'][] = 'The server was not able to update the student on the database';
     }
 } else {
     $output['errors'][] = 'error in SQL query or credentials';

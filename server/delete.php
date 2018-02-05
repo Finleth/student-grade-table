@@ -2,11 +2,11 @@
 
 require_once('sgtcreds.php');
 
-$id = $_GET['student_id'];
+$id = $_POST['student_id'];
 
-$query = "DELETE FROM students WHERE id=$id";
+$sql = "DELETE FROM students WHERE id=$id";
 
-$result = mysqli_query($conn, $query);
+$result = mysqli_query($conn, $sql);
 
 $output = [
     'success' => false,
@@ -20,7 +20,6 @@ if ($result){
         $output['data'][] = 'Student was successfully deleted';
     } else {
         $output['errors'][] = 'The server was not able to delete the student in the database';
-        $output['errors'][] = $result;
     }
 } else {
     $output['errors'][] = 'error in SQL query or credentials';
