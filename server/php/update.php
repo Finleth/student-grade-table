@@ -7,8 +7,6 @@ $course = filter_var($_POST['course'], FILTER_SANITIZE_STRING);
 $grade = filter_var($_POST['grade'], FILTER_SANITIZE_NUMBER_INT);
 $id = filter_var($_POST['id'], FILTER_SANITIZE_NUMBER_INT);
 
-
-
 $output = [
     'success' => false,
     'data' => [],
@@ -32,7 +30,6 @@ if (!empty($output['errors'])){
     print($json_output);
     exit;
 }
-
 
 $sql = "CALL updateStudent('{$name}', '{$course}', {$grade}, {$id})";
 
