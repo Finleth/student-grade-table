@@ -32,20 +32,19 @@ if (!empty($output['errors'])){
 }
 
 
+$stmt = mysqli_prepare($conn, "INSERT INTO students SET name = ?, course = ?, grade = ?");
 
-$sql = "INSERT INTO students SET name = '{$name}', course = '{$course}', grade = {$grade}";
+mysqli_stmt_bind_param($stmt, "sss", $name, $course, $grade);
 
-$result = mysqli_query($conn, $sql);
+mysqli_stmt_execute($stmt);
+
+$result = mysqli_stmt_fetch($stmt);
 
 
-if ($result) {
-    if ( mysqli_affected_rows($conn) > 0 ){
-        $new_id = mysqli_insert_id($conn);
-        $output['success'] = true;
-        $output['new_id'] = $new_id;
-    } else {
-        $output['errors'][] = 'There was an error on the server. Try again.';
-    }
+if ( mysqli_affected_rows($conn) > 0 ){
+    $new_id = mysqli_insert_id($conn);
+    $output['success'] = true;
+    $output['new_id'] = $new_id;
 } else {
     $output['errors'][] = 'There was an error on the server. Try again.';
 }

@@ -133,7 +133,7 @@ function addStudentToServer(student){
                 student_array.push(student);
                 updateStudentList(student_array);
             } else {
-                displayError("Invalid Input", data.errors[0])
+                displayError("Unable To Add Student", data.errors)
             }
         },
         error: handleAjaxError,
@@ -293,7 +293,7 @@ function updateStudentOnServer(editForm, student_index, successCallback, rowCont
                 calculateGradeAverage(student_array);
                 renderGradeAverage(gradeAvg);
             } else {
-                displayError("Unable to Update", results.errors[0])
+                displayError("Unable to Update", results.errors)
             }
         },
         error: handleAjaxError
@@ -313,7 +313,7 @@ function deleteStudentFromServer(domElmt, objIndex, deleteStudent){
             if (results.success) {
                 deleteStudentForUser(objIndex, domElmt.parentNode.parentNode);
             } else {
-                displayError("Unauthorized To Delete", results.errors[0])
+                displayError("Unable To Delete", results.errors)
             }
         },
         error: handleAjaxError,
@@ -382,18 +382,17 @@ function renderGradeAverage(average){
 function displayError(errorTitle, errorMessage){
     $('#errorModal').modal('show');
     $('#errorModal .errorModalTitle').text(errorTitle);
-    $('#errorModal .errorModalMessage').text(errorMessage);
+    $('#errorModal .errorModalMessage').text(errorMessage[0]);
 }
 
-function handleAjaxError(data){
-    displayError(data.status+" Error", data.statusText);
+function handleAjaxError(){
+    displayError("Server Error", 'There was a problem connecting to the server. Try again in a few minutes.');
 }
 
 function addLoadingForButton(button){
     $(button).off('click');
     $(button).find('.loadingSpinner').addClass('glyphicon glyphicon-refresh animateSpin');
 }
-
 
 function removeLoadingForButton(button, callbackFunction){
     $(button).find('.loadingSpinner').removeClass('glyphicon glyphicon-refresh animateSpin');
