@@ -92,7 +92,7 @@ function requestServerData(targetButton){
             if (data.success) {
                 addServerDataToStudentArray(data);
             } else {
-                displayError("Error", 'There was a ' + data.error[0] + ' on the server');
+                displayErrorModal("Error", 'There was a ' + data.error[0] + ' on the server');
             }
         },
         error: handleAjaxError,
@@ -133,7 +133,7 @@ function addStudentToServer(student){
                 student_array.push(student);
                 updateStudentList(student_array);
             } else {
-                displayError("Unable To Add Student", data.errors)
+                displayErrorModal("Unable To Add Student", data.errors)
             }
         },
         error: handleAjaxError,
@@ -161,7 +161,7 @@ function renderStudentOnDom(studentObj){
     }).on('click', editStudent);
     var deleteBtn = $('<button>',{
         'class': 'btn btn-danger btn-sm operation-btn'
-    }).on('click', deleteStudent);
+    }).on('click', initiateDeleteStudent);
     var deleteSpinner = $('<span>',{
         'class': 'loadingSpinner'
     });
@@ -213,7 +213,9 @@ function renderStudentOnDom(studentObj){
         var td = $('<td>',{
             colspan: 4
         });
-        var form = $('<form>').on('submit', confirmEdit);
+        var form = $('<form>',{
+            autocomplete: 'off'
+        }).on('submit', confirmEdit);
         var btnDiv = $('<div>',{
             'class': 'edit-delete-container'
         })
@@ -249,15 +251,22 @@ function renderStudentOnDom(studentObj){
 
         function revertEditAndDelete(contents){
             editBtn.on('click', editStudent);
-            deleteBtn.on('click', deleteStudent);
+            deleteBtn.on('click', initiateDeleteStudent);
             row.empty().append(contents);
         }
     }
 
+    function initiateDeleteStudent(event){
+        displayDeleteModal(studentObj);
+        $('#confirm_delete').off('click');
+        $('#confirm_delete').on('click', deleteStudent.bind(null, event));
+    }
+
     function deleteStudent(event){
         addLoadingForButton(event.target);
+        $('#delete_modal').modal('hide');
         var objIndex = student_array.indexOf(studentObj);
-
+    
         deleteStudentFromServer(event.target, objIndex, deleteStudent);
     }
 }
@@ -293,7 +302,7 @@ function updateStudentOnServer(editForm, student_index, successCallback, rowCont
                 calculateGradeAverage(student_array);
                 renderGradeAverage(gradeAvg);
             } else {
-                displayError("Unable to Update", results.errors)
+                displayErrorModal("Unable to Update", results.errors)
             }
         },
         error: handleAjaxError
@@ -313,7 +322,7 @@ function deleteStudentFromServer(domElmt, objIndex, deleteStudent){
             if (results.success) {
                 deleteStudentForUser(objIndex, domElmt.parentNode.parentNode);
             } else {
-                displayError("Unable To Delete", results.errors)
+                displayErrorModal("Unable To Delete", results.errors)
             }
         },
         error: handleAjaxError,
@@ -379,14 +388,21 @@ function renderGradeAverage(average){
     $('.avgGrade').text(average);
 }
 
-function displayError(errorTitle, errorMessage){
+function displayDeleteModal(studentObj){
+    $('#delete_modal').modal('show');
+    $('.delete_modal_name').empty().text('Name:  ' + studentObj.name);
+    $('.delete_modal_course').empty().text('Course:  ' + studentObj.course);
+    $('.delete_modal_grade').empty().text('Grade:  ' + studentObj.grade);
+}
+
+function displayErrorModal(errorTitle, errorMessage){
     $('#errorModal').modal('show');
     $('#errorModal .errorModalTitle').text(errorTitle);
     $('#errorModal .errorModalMessage').text(errorMessage[0]);
 }
 
 function handleAjaxError(){
-    displayError("Server Error", 'There was a problem connecting to the server. Try again in a few minutes.');
+    displayErrorModal("Server Error", ['There was a problem connecting to the server. Try again in a few minutes.']);
 }
 
 function addLoadingForButton(button){

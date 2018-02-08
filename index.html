@@ -64,15 +64,35 @@
         </h2>
     </div>
 
-    <div class="modal fade" id="errorModal" role="dialog">
+    <div class="modal fade" id="error_modal" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title errorModalTitle">Unable to do stuff</h4>
+                    <h4 class="modal-title error_modal_title">Unable to do stuff</h4>
                 </div>
-                <div class="modal-body errorModalMessage">
+                <div class="modal-body error_modal_message">
                     <p>This dog won't hunt! Son, you're in more trouble than a squirrel on a eight lane highway, ya'hear?</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="delete_modal" role="document">
+        <div class="modal-dialog delete_modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title confirmation_message">Confirm Delete</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the student:</p>
+                    <p class="delete_modal_name"></p>
+                    <p class="delete_modal_course"></p>
+                    <p class="delete_modal_grade"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirm_delete" class="btn btn-success">Confirm</button>
                 </div>
             </div>
         </div>
