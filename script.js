@@ -408,10 +408,10 @@ function displayDeleteModal(studentObj){
     $('.delete_modal_grade').empty().text('Grade:  ' + studentObj.grade);
 }
 
-function displayErrorModal(errorTitle, errorMessage){
+function displayErrorModal(errorTitle, errorMessages){
     $('#errorModal').modal('show');
     $('#errorModal .errorModalTitle').text(errorTitle);
-    $('#errorModal .errorModalMessage').text(errorMessage[0]);
+    $('#errorModal .errorModalMessage p').empty().append(errorMessages);
 }
 
 function handleAjaxError(){
