@@ -4,6 +4,7 @@ $(document).ready( initializeApp );
 var student_array = [];
 var gradeAvg = 0;
 var currentBackend = 'php';
+var formSubmitting = false;
 
 var backends = {
     php: {
@@ -53,24 +54,22 @@ function initializeApp(){
 
 function addClickHandlersToElements(){
     $('form#loginForm').submit( handleSubmit );
-    $('#cancel').on('click', handleCancelClick);
-    $('#getData').on('click', handleGetDataClick);
+    $('#reset').on('click', handleCancelClick);
     $('#switchServer').on('click', handleServerSwitchClick);
 }
 
 function handleSubmit(event){
     event.preventDefault();
+    addLoadingForButton($('#add'));
+    if (formSubmitting){
+        return false;
+    }
+    formSubmitting = true;
     addStudent();
 }
 
 function handleCancelClick(){
     clearAddStudentFormInputs();
-}
-
-
-function handleGetDataClick(event){
-    addLoadingForButton(event.target);
-    requestServerData(event.target);
 }
 
 function handleServerSwitchClick(event){
@@ -83,7 +82,7 @@ function handleServerSwitchClick(event){
     }
 }
 
-function requestServerData(targetButton){
+function requestServerData(){
     $.ajax( {
         dataType: 'json',
         method: backends[currentBackend].read.method,
@@ -92,15 +91,10 @@ function requestServerData(targetButton){
             if (data.success) {
                 addServerDataToStudentArray(data);
             } else {
-                displayError("Error", 'There was a ' + data.error[0] + ' on the server');
+                displayErrorModal("Unable To Obtain Student Data", data.error);
             }
         },
         error: handleAjaxError,
-        complete: function(){
-            setTimeout(function(){
-                removeLoadingForButton(targetButton, handleGetDataClick);
-            }, 200);
-        }
     } );
 }
 
@@ -133,10 +127,16 @@ function addStudentToServer(student){
                 student_array.push(student);
                 updateStudentList(student_array);
             } else {
-                displayError("Unable To Add Student", data.errors)
+                displayErrorModal("Unable To Add Student", data.errors)
             }
         },
         error: handleAjaxError,
+        complete: function(){
+            setTimeout(function(){
+                removeLoadingForButton($('#add'));
+                formSubmitting = false;
+            }, 200);
+        }
     });
 }
 
@@ -145,6 +145,7 @@ function clearAddStudentFormInputs(){
     $('#studentName').val('');
     $('#course').val('');
     $('#studentGrade').val('');
+    $('#studentName').focus();
 }
 
 
@@ -161,21 +162,19 @@ function renderStudentOnDom(studentObj){
     }).on('click', editStudent);
     var deleteBtn = $('<button>',{
         'class': 'btn btn-danger btn-sm operation-btn'
-    }).on('click', deleteStudent);
-    var deleteSpinner = $('<span>',{
+    }).on('click', initiateDeleteStudent);
+    var loadingSpinner = $('<span>',{
         'class': 'loadingSpinner'
     });
 
     buttons = [editBtn, deleteBtn];
     rowContents = [name, course, grade, operations];
 
-    deleteBtn.append(deleteSpinner, ' Delete');
+    deleteBtn.append(loadingSpinner, ' Delete');
     operations.append(buttons);
     row.append(rowContents);
     $('.student-list tbody').append(row);
 
-    // adding next two function definitions inside this render student on 
-    // dom function for the use of closures
 
     function editStudent(event){
         revertAnyEditing();
@@ -213,19 +212,22 @@ function renderStudentOnDom(studentObj){
         var td = $('<td>',{
             colspan: 4
         });
-        var form = $('<form>').on('submit', confirmEdit);
+        var form = $('<form>',{
+            autocomplete: 'off'
+        }).on('submit', confirmEdit);
         var btnDiv = $('<div>',{
             'class': 'edit-delete-container'
         })
-        var confirmBtn = $('<input>',{
+        var confirmBtn = $('<button>',{
             'type': 'submit',
-            'value': 'Confirm',
-            'class': 'btn btn-success btn-sm operation-btn'
+            'class': 'btn btn-success btn-sm operation-btn',
+            'id': 'confirm-edit'
         });
         var cancelBtn = $('<button>',{
             'text': 'Cancel',
             'class': 'btn btn-danger btn-sm operation-btn float-right'
         }).on('click', cancelEdit);
+        confirmBtn.append(loadingSpinner, 'Confirm');
         btnDiv.append([confirmBtn, cancelBtn]);
 
         for (var i=0; i<3; i++){
@@ -236,9 +238,16 @@ function renderStudentOnDom(studentObj){
         form.append(btnDiv);
         td.append(form);
         row.empty().append(td);
+
+        removeLoadingForButton($(confirmBtn));
         
         function confirmEdit(event){
             event.preventDefault(); 
+            if (formSubmitting){
+                return false;
+            }
+            formSubmitting = true;
+            addLoadingForButton(confirmBtn);
             updateStudentOnServer(form[0], student_array.indexOf(studentObj), revertEditAndDelete, rowContents);           
         }
 
@@ -249,15 +258,22 @@ function renderStudentOnDom(studentObj){
 
         function revertEditAndDelete(contents){
             editBtn.on('click', editStudent);
-            deleteBtn.on('click', deleteStudent);
+            deleteBtn.on('click', initiateDeleteStudent);
             row.empty().append(contents);
         }
     }
 
+    function initiateDeleteStudent(event){
+        displayDeleteModal(studentObj);
+        $('#confirm_delete').off('click');
+        $('#confirm_delete').on('click', deleteStudent.bind(null, event));
+    }
+
     function deleteStudent(event){
         addLoadingForButton(event.target);
+        $('#delete_modal').modal('hide');
         var objIndex = student_array.indexOf(studentObj);
-
+    
         deleteStudentFromServer(event.target, objIndex, deleteStudent);
     }
 }
@@ -293,10 +309,16 @@ function updateStudentOnServer(editForm, student_index, successCallback, rowCont
                 calculateGradeAverage(student_array);
                 renderGradeAverage(gradeAvg);
             } else {
-                displayError("Unable to Update", results.errors)
+                displayErrorModal("Unable to Update", results.errors)
             }
         },
-        error: handleAjaxError
+        error: handleAjaxError,
+        complete: function(){
+            setTimeout(function(){
+                removeLoadingForButton($('#confirm-edit'));
+                formSubmitting = false;
+            }, 200);
+        }
     }
     $.ajax(ajaxOptions);
 }
@@ -313,14 +335,14 @@ function deleteStudentFromServer(domElmt, objIndex, deleteStudent){
             if (results.success) {
                 deleteStudentForUser(objIndex, domElmt.parentNode.parentNode);
             } else {
-                displayError("Unable To Delete", results.errors)
+                displayErrorModal("Unable To Delete", results.errors)
             }
         },
         error: handleAjaxError,
         complete: function(){
             setTimeout(function(){
                 removeLoadingForButton(domElmt, deleteStudent);
-            }, 100)
+            }, 200)
         }
     }
     $.ajax(ajaxOptions);
@@ -379,14 +401,21 @@ function renderGradeAverage(average){
     $('.avgGrade').text(average);
 }
 
-function displayError(errorTitle, errorMessage){
+function displayDeleteModal(studentObj){
+    $('#delete_modal').modal('show');
+    $('.delete_modal_name').empty().text('Name:  ' + studentObj.name);
+    $('.delete_modal_course').empty().text('Course:  ' + studentObj.course);
+    $('.delete_modal_grade').empty().text('Grade:  ' + studentObj.grade);
+}
+
+function displayErrorModal(errorTitle, errorMessage){
     $('#errorModal').modal('show');
     $('#errorModal .errorModalTitle').text(errorTitle);
     $('#errorModal .errorModalMessage').text(errorMessage[0]);
 }
 
 function handleAjaxError(){
-    displayError("Server Error", 'There was a problem connecting to the server. Try again in a few minutes.');
+    displayErrorModal("Server Error", ['There was a problem connecting to the server. Try again in a few minutes.']);
 }
 
 function addLoadingForButton(button){
@@ -396,5 +425,7 @@ function addLoadingForButton(button){
 
 function removeLoadingForButton(button, callbackFunction){
     $(button).find('.loadingSpinner').removeClass('glyphicon glyphicon-refresh animateSpin');
-    $(button).on('click', callbackFunction);
+    if (callbackFunction){
+        $(button).on('click', callbackFunction);
+    }
 }

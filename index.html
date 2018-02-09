@@ -41,9 +41,8 @@
             </span>
             <input type="text" class="form-control" name="studentGrade" id="studentGrade" placeholder="Student Grade" pattern="^\d{1,2}$|100" title="Grade must be an integer between 0 and 100." required>
         </div>
-        <input type="submit" class="btn btn-success" id="add" value="Add">
-        <button type="button" class="btn btn-default" id="cancel">Clear</button>
-        <button type="button" class="btn btn-primary" id="getData"><span class="loadingSpinner"></span>Get Server Data</button>
+        <button type="submit" class="btn btn-success" id="add"><span class="loadingSpinner"></span>Add</button>
+        <button type="button" class="btn btn-default" id="reset">Reset</button>
         <button type="button" class="btn btn-info" id="switchServer">Use Node Server</button>
     </form>
     <div class="student-list-container col-md-9 col-xs-12">
@@ -64,15 +63,35 @@
         </h2>
     </div>
 
-    <div class="modal fade" id="errorModal" role="dialog">
+    <div class="modal fade" id="error_modal" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title errorModalTitle">Unable to do stuff</h4>
+                    <h4 class="modal-title error_modal_title">Unable to do stuff</h4>
                 </div>
-                <div class="modal-body errorModalMessage">
+                <div class="modal-body error_modal_message">
                     <p>This dog won't hunt! Son, you're in more trouble than a squirrel on a eight lane highway, ya'hear?</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="delete_modal" role="document">
+        <div class="modal-dialog delete_modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title confirmation_message">Confirm Delete</h3>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the student:</p>
+                    <p class="delete_modal_name"></p>
+                    <p class="delete_modal_course"></p>
+                    <p class="delete_modal_grade"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirm_delete" class="btn btn-success">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
