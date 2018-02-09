@@ -1,3 +1,7 @@
+p {
+    font-size: 18px;
+}
+
 .modal.in .delete_modal {
     position: absolute;
     top: 40%;

@@ -41,9 +41,8 @@
             </span>
             <input type="text" class="form-control" name="studentGrade" id="studentGrade" placeholder="Student Grade" pattern="^\d{1,2}$|100" title="Grade must be an integer between 0 and 100." required>
         </div>
-        <input type="submit" class="btn btn-success" id="add" value="Add">
-        <button type="button" class="btn btn-default" id="cancel">Clear</button>
-        <button type="button" class="btn btn-primary" id="getData"><span class="loadingSpinner"></span>Get Server Data</button>
+        <button type="submit" class="btn btn-success" id="add"><span class="loadingSpinner"></span>Add</button>
+        <button type="button" class="btn btn-default" id="reset">Reset</button>
         <button type="button" class="btn btn-info" id="switchServer">Use Node Server</button>
     </form>
     <div class="student-list-container col-md-9 col-xs-12">
@@ -82,7 +81,7 @@
         <div class="modal-dialog delete_modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title confirmation_message">Confirm Delete</h4>
+                    <h3 class="modal-title confirmation_message">Confirm Delete</h3>
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to delete the student:</p>
@@ -91,8 +90,8 @@
                     <p class="delete_modal_grade"></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="button" id="confirm_delete" class="btn btn-success">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>

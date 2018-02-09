@@ -4,6 +4,7 @@ $(document).ready( initializeApp );
 var student_array = [];
 var gradeAvg = 0;
 var currentBackend = 'php';
+var formSubmitting = false;
 
 var backends = {
     php: {
@@ -53,24 +54,22 @@ function initializeApp(){
 
 function addClickHandlersToElements(){
     $('form#loginForm').submit( handleSubmit );
-    $('#cancel').on('click', handleCancelClick);
-    $('#getData').on('click', handleGetDataClick);
+    $('#reset').on('click', handleCancelClick);
     $('#switchServer').on('click', handleServerSwitchClick);
 }
 
 function handleSubmit(event){
     event.preventDefault();
+    addLoadingForButton($('#add'));
+    if (formSubmitting){
+        return false;
+    }
+    formSubmitting = true;
     addStudent();
 }
 
 function handleCancelClick(){
     clearAddStudentFormInputs();
-}
-
-
-function handleGetDataClick(event){
-    addLoadingForButton(event.target);
-    requestServerData(event.target);
 }
 
 function handleServerSwitchClick(event){
@@ -83,7 +82,7 @@ function handleServerSwitchClick(event){
     }
 }
 
-function requestServerData(targetButton){
+function requestServerData(){
     $.ajax( {
         dataType: 'json',
         method: backends[currentBackend].read.method,
@@ -92,15 +91,10 @@ function requestServerData(targetButton){
             if (data.success) {
                 addServerDataToStudentArray(data);
             } else {
-                displayErrorModal("Error", 'There was a ' + data.error[0] + ' on the server');
+                displayErrorModal("Unable To Obtain Student Data", data.error);
             }
         },
         error: handleAjaxError,
-        complete: function(){
-            setTimeout(function(){
-                removeLoadingForButton(targetButton, handleGetDataClick);
-            }, 200);
-        }
     } );
 }
 
@@ -137,6 +131,12 @@ function addStudentToServer(student){
             }
         },
         error: handleAjaxError,
+        complete: function(){
+            setTimeout(function(){
+                removeLoadingForButton($('#add'));
+                formSubmitting = false;
+            }, 200);
+        }
     });
 }
 
@@ -145,6 +145,7 @@ function clearAddStudentFormInputs(){
     $('#studentName').val('');
     $('#course').val('');
     $('#studentGrade').val('');
+    $('#studentName').focus();
 }
 
 
@@ -162,20 +163,18 @@ function renderStudentOnDom(studentObj){
     var deleteBtn = $('<button>',{
         'class': 'btn btn-danger btn-sm operation-btn'
     }).on('click', initiateDeleteStudent);
-    var deleteSpinner = $('<span>',{
+    var loadingSpinner = $('<span>',{
         'class': 'loadingSpinner'
     });
 
     buttons = [editBtn, deleteBtn];
     rowContents = [name, course, grade, operations];
 
-    deleteBtn.append(deleteSpinner, ' Delete');
+    deleteBtn.append(loadingSpinner, ' Delete');
     operations.append(buttons);
     row.append(rowContents);
     $('.student-list tbody').append(row);
 
-    // adding next two function definitions inside this render student on 
-    // dom function for the use of closures
 
     function editStudent(event){
         revertAnyEditing();
@@ -219,15 +218,16 @@ function renderStudentOnDom(studentObj){
         var btnDiv = $('<div>',{
             'class': 'edit-delete-container'
         })
-        var confirmBtn = $('<input>',{
+        var confirmBtn = $('<button>',{
             'type': 'submit',
-            'value': 'Confirm',
-            'class': 'btn btn-success btn-sm operation-btn'
+            'class': 'btn btn-success btn-sm operation-btn',
+            'id': 'confirm-edit'
         });
         var cancelBtn = $('<button>',{
             'text': 'Cancel',
             'class': 'btn btn-danger btn-sm operation-btn float-right'
         }).on('click', cancelEdit);
+        confirmBtn.append(loadingSpinner, 'Confirm');
         btnDiv.append([confirmBtn, cancelBtn]);
 
         for (var i=0; i<3; i++){
@@ -238,9 +238,16 @@ function renderStudentOnDom(studentObj){
         form.append(btnDiv);
         td.append(form);
         row.empty().append(td);
+
+        removeLoadingForButton($(confirmBtn));
         
         function confirmEdit(event){
             event.preventDefault(); 
+            if (formSubmitting){
+                return false;
+            }
+            formSubmitting = true;
+            addLoadingForButton(confirmBtn);
             updateStudentOnServer(form[0], student_array.indexOf(studentObj), revertEditAndDelete, rowContents);           
         }
 
@@ -305,7 +312,13 @@ function updateStudentOnServer(editForm, student_index, successCallback, rowCont
                 displayErrorModal("Unable to Update", results.errors)
             }
         },
-        error: handleAjaxError
+        error: handleAjaxError,
+        complete: function(){
+            setTimeout(function(){
+                removeLoadingForButton($('#confirm-edit'));
+                formSubmitting = false;
+            }, 200);
+        }
     }
     $.ajax(ajaxOptions);
 }
@@ -329,7 +342,7 @@ function deleteStudentFromServer(domElmt, objIndex, deleteStudent){
         complete: function(){
             setTimeout(function(){
                 removeLoadingForButton(domElmt, deleteStudent);
-            }, 100)
+            }, 200)
         }
     }
     $.ajax(ajaxOptions);
@@ -412,5 +425,7 @@ function addLoadingForButton(button){
 
 function removeLoadingForButton(button, callbackFunction){
     $(button).find('.loadingSpinner').removeClass('glyphicon glyphicon-refresh animateSpin');
-    $(button).on('click', callbackFunction);
+    if (callbackFunction){
+        $(button).on('click', callbackFunction);
+    }
 }
