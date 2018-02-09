@@ -1,6 +1,6 @@
 <?php
 
-require_once('sgtcreds.php');
+require_once('../../../sgtcreds/sgtcreds.php');
 
 $sql = "SELECT * FROM students";
 

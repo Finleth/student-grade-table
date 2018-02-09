@@ -1,5 +1,5 @@
 const express = require('express');
-const credentials = require('./sgtcreds');
+const credentials = require('/../sgtcreds/sgtcreds');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 
