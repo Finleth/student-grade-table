@@ -1,0 +1,24 @@
+{
+  "name": "student_grade_table",
+  "version": "1.0.0",
+  "description": "A CMS for managing student courses and grades",
+  "main": "script.js",
+  "dependencies": {
+    "express": "^4.16.2",
+    "mysql": "^2.15.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Finleth/student-grade-table.git"
+  },
+  "author": "Jeffrey Pau",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Finleth/student-grade-table/issues"
+  },
+  "homepage": "https://github.com/Finleth/student-grade-table#readme"
+}
