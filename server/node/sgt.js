@@ -31,7 +31,7 @@ server.get('/student', (req, res) => {
             output.success = true;
             output.data = results;
         } else {
-            output.error = 'There was an error on the server. Try again.';
+            output.error.push('There was an error on the server. Try again.');
         }
 
         const json_output = JSON.stringify(output);

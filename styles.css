@@ -1,3 +1,7 @@
+body {
+    background-color: #b9e1c6;
+}
+
 p {
     font-size: 18px;
 }
@@ -33,6 +37,10 @@ p {
 
 tbody tr:nth-child(2n+1) {
     background-color: rgb(234, 234, 253);
+}
+
+tbody tr:nth-child(2n) {
+    background-color: white;
 }
 
 .animateSpin {
