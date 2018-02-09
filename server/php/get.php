@@ -1,6 +1,6 @@
 <?php
 
-require_once('../../../sgtcreds/sgtcreds.php');
+require_once('../../../../../sgtcreds/sgtcreds.php');
 
 $sql = "SELECT * FROM students";
 
@@ -19,7 +19,8 @@ if ($result){
         }
         $output['success'] = true;
     } else {
-        $output['errors'][] = 'There was an error on the server. Try again.';
+        $output['success'] = true;
+        $output['errors'][] = 'No student data available';
     }
 } else {
     $output['errors'][] = 'There was an error on the server. Try again.';
