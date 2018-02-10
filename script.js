@@ -27,19 +27,19 @@ var backends = {
     },
     node: {
         create: {
-            url: 'http://localhost:3000/studentcreate',
+            url: '/studentcreate',
             method: 'post'
         },
         update: {
-            url: 'http://localhost:3000/studentupdate',
+            url: '/studentupdate',
             method: 'post'
         },
         'delete': {
-            url: 'http://localhost:3000/studentdelete',
+            url: '/studentdelete',
             method: 'post'
         },
         read: {
-            url: 'http://localhost:3000/student',
+            url: '/student',
             method: 'get'
         }
     }
