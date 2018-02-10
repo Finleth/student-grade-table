@@ -1,6 +1,6 @@
 <?php
 
-require_once('sgtcreds.php');
+require_once('../../../../../sgtcreds/sgtcreds.php');
 
 $id = filter_var($_POST['student_id'], FILTER_SANITIZE_NUMBER_INT);
 

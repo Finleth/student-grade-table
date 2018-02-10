@@ -1,6 +1,6 @@
 <?php
 
-require_once('sgtcreds.php');
+require_once('../../../../../sgtcreds/sgtcreds.php');
 
 $name = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
 $course = filter_var($_POST['course'], FILTER_SANITIZE_STRING);
