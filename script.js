@@ -27,19 +27,19 @@ var backends = {
     },
     node: {
         create: {
-            url: '/studentcreate',
+            url: '/apps/sgt/studentcreate',
             method: 'post'
         },
         update: {
-            url: '/studentupdate',
+            url: '/apps/sgt/studentupdate',
             method: 'post'
         },
         'delete': {
-            url: '/studentdelete',
+            url: '/apps/sgt/studentdelete',
             method: 'post'
         },
         read: {
-            url: '/student',
+            url: '/apps/sgt/student',
             method: 'get'
         }
     }
