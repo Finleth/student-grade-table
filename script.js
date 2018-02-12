@@ -3,7 +3,7 @@ $(document).ready( initializeApp );
 
 var student_array = [];
 var gradeAvg = 0;
-var currentBackend = 'php';
+var currentBackend;
 var formSubmitting = false;
 
 var backends = {
@@ -46,11 +46,19 @@ var backends = {
 };
 
 function initializeApp(){
+    checkCurrentBackend();
     addClickHandlersToElements();
     updateStudentList(student_array);
     requestServerData(null);
 }
 
+function checkCurrentBackend(){
+    if (!localStorage.getItem('backend')){
+        localStorage.setItem('backend', 'php');
+    }
+
+    currentBackend = localStorage.getItem('backend');
+}
 
 function addClickHandlersToElements(){
     $('form#loginForm').submit( handleSubmit );
@@ -75,11 +83,13 @@ function handleCancelClick(){
 function handleServerSwitchClick(event){
     if (currentBackend === 'node'){
         event.target.innerText = 'Use Node Server';
-        currentBackend = 'php';
+        localStorage.setItem('backend', 'php')
     } else {
-        event.target.innerText = 'Use PHP Server'
-        currentBackend = 'node';
+        event.target.innerText = 'Use PHP Server';
+        localStorage.setItem('backend', 'node');
     }
+
+    currentBackend = localStorage.getItem('backend');
 }
 
 function requestServerData(){
