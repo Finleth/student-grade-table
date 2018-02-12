@@ -58,6 +58,7 @@ function checkCurrentBackend(){
     }
 
     currentBackend = localStorage.getItem('backend');
+    changeSwitchServerButtonText(currentBackend);
 }
 
 function addClickHandlersToElements(){
@@ -80,16 +81,27 @@ function handleCancelClick(){
     clearAddStudentFormInputs();
 }
 
-function handleServerSwitchClick(event){
+function handleServerSwitchClick(){
     if (currentBackend === 'node'){
-        event.target.innerText = 'Use Node Server';
         localStorage.setItem('backend', 'php')
     } else {
-        event.target.innerText = 'Use PHP Server';
         localStorage.setItem('backend', 'node');
     }
 
     currentBackend = localStorage.getItem('backend');
+    changeSwitchServerButtonText(currentBackend);
+}
+
+function changeSwitchServerButtonText(backend){
+    var button = $('#switchServer');
+    switch(backend){
+        case 'php':
+            button.text('Use Node Server');
+            break;
+        case 'node':
+            button.text('Use PHP Server');
+            break;    
+    }
 }
 
 function requestServerData(){
