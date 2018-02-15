@@ -43,6 +43,10 @@ tbody tr:nth-child(2n) {
     background-color: white;
 }
 
+.table > tbody > tr > td {
+    vertical-align: middle;
+}
+
 .animateSpin {
     animation: spin .6s infinite linear;
 }

@@ -3,7 +3,7 @@ $(document).ready( initializeApp );
 
 var student_array = [];
 var gradeAvg = 0;
-var currentBackend = 'php';
+var currentBackend;
 var formSubmitting = false;
 
 var backends = {
@@ -27,30 +27,39 @@ var backends = {
     },
     node: {
         create: {
-            url: 'http://localhost:3000/studentcreate',
+            url: '/apps/sgt/node/studentcreate',
             method: 'post'
         },
         update: {
-            url: 'http://localhost:3000/studentupdate',
+            url: '/apps/sgt/node/studentupdate',
             method: 'post'
         },
         'delete': {
-            url: 'http://localhost:3000/studentdelete',
+            url: '/apps/sgt/node/studentdelete',
             method: 'post'
         },
         read: {
-            url: 'http://localhost:3000/student',
+            url: '/apps/sgt/node/student',
             method: 'get'
         }
     }
 };
 
 function initializeApp(){
+    checkCurrentBackend();
     addClickHandlersToElements();
     updateStudentList(student_array);
     requestServerData(null);
 }
 
+function checkCurrentBackend(){
+    if (!localStorage.getItem('backend')){
+        localStorage.setItem('backend', 'php');
+    }
+
+    currentBackend = localStorage.getItem('backend');
+    changeSwitchServerButtonText(currentBackend);
+}
 
 function addClickHandlersToElements(){
     $('form#loginForm').submit( handleSubmit );
@@ -72,13 +81,26 @@ function handleCancelClick(){
     clearAddStudentFormInputs();
 }
 
-function handleServerSwitchClick(event){
+function handleServerSwitchClick(){
     if (currentBackend === 'node'){
-        event.target.innerText = 'Use Node Server';
-        currentBackend = 'php';
+        localStorage.setItem('backend', 'php')
     } else {
-        event.target.innerText = 'Use PHP Server'
-        currentBackend = 'node';
+        localStorage.setItem('backend', 'node');
+    }
+
+    currentBackend = localStorage.getItem('backend');
+    changeSwitchServerButtonText(currentBackend);
+}
+
+function changeSwitchServerButtonText(backend){
+    var button = $('#switchServer');
+    switch(backend){
+        case 'php':
+            button.text('Use Node Server');
+            break;
+        case 'node':
+            button.text('Use PHP Server');
+            break;    
     }
 }
 
