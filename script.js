@@ -21,7 +21,7 @@ var backends = {
             method: 'post'
         },
         read: {
-            url: './server/php/get.php',
+            url: './server/php/read.php',
             method: 'get'
         }
     },

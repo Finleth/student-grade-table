@@ -4,9 +4,9 @@ require_once('studentClass.php');
 
 $studentOperations = new StudentOperations;
 
-$delete_output = $studentOperations -> delete();
+$read_output = $studentOperations -> read();
 
-$json_output = json_encode($delete_output);
+$json_output = json_encode($read_output);
 
 print($json_output);
 
